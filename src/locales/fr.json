@@ -29,5 +29,9 @@
   "world.prompt": "Fuseau : {value}",
   "world.added": "{zone} ajouté",
   "world.removed": "{zone} supprimé",
-  "world.empty": "aucun fuseau à supprimer"
+  "world.empty": "aucun fuseau à supprimer",
+  "exclusive.counter_running": "le compteur tourne, arrêtez-le d'abord",
+  "exclusive.timer_running": "la minuterie tourne, mettez-la en pause d'abord",
+  "keys.box": "[b] changer le design",
+  "box.changed": "design de l'horloge : {style}"
 }

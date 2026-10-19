@@ -29,5 +29,9 @@
   "world.prompt": "時間帯: {value}",
   "world.added": "{zone} を追加しました",
   "world.removed": "{zone} を削除しました",
-  "world.empty": "削除する時間帯がありません"
+  "world.empty": "削除する時間帯がありません",
+  "exclusive.counter_running": "カウンターが実行中です。先に停止してください",
+  "exclusive.timer_running": "タイマーが実行中です。先に一時停止してください",
+  "keys.box": "[b] 時計のデザイン変更",
+  "box.changed": "時計のデザイン: {style}"
 }

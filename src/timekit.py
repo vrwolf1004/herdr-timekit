@@ -586,6 +586,8 @@ class Host:
         self.timer_label = ""
         self.registered_state = None
         self.mark = None
+        self.counter_active = False
+        self.counter_value_now = 0
 
     def settings(self):
         """매 틱 설정을 다시 읽는다. 고장난 파일이면 기본값을 쓰고 오류를 화면에 보여 준다."""
@@ -619,20 +621,27 @@ class Host:
         }
         timer_label = self.timer_label if self.timer_status != "idle" else None
         box = watch_lines(moment, mark, config.get("box_style", DEFAULT_BOX_STYLE), timer_label)
+        counter = self.state.read_counter_state()
+        self.counter_active = counter["started_at"] is not None
+        self.counter_value_now = counter_value(counter, now)
         self.world_lines = world_lines(config.get("timezones", []))
         for index, line in enumerate(box, 1):
             tokens[f"tk_box{index}"] = line
         return tokens
 
     def display_name(self):
-        """타이머가 돌거나 멈춰 있거나 끝났으면 에이전트 이름에 타이머 값을 붙인다."""
-        if self.timer_status == "idle":
-            return DISPLAY_AGENT
-        return f"{DISPLAY_AGENT} {self.timer_label}"
+        """돌고 있는 타이머 또는 카운터 값을 에이전트 이름에 붙인다. 둘 다 멈춰 있으면 이름만 쓴다."""
+        if self.timer_status == "running":
+            return f"{DISPLAY_AGENT} {self.timer_label}"
+        if self.counter_active:
+            return f"{DISPLAY_AGENT} # {self.counter_value_now}"
+        if self.timer_status != "idle":
+            return f"{DISPLAY_AGENT} {self.timer_label}"
+        return DISPLAY_AGENT
 
     def agent_state(self):
         """타이머가 돌고 있으면 working, 아니면 idle 로 보고한다."""
-        return "working" if self.timer_status == "running" else "idle"
+        return "working" if (self.timer_status == "running" or self.counter_active) else "idle"
 
     def report(self, tokens):
         ok = herdr_api.try_request("pane.report_metadata", {
@@ -730,6 +739,27 @@ class Host:
         save_config(self.config_dir, config)
         self.notice = t("world.removed", zone=removed)
 
+    def change_box_style(self):
+        """시계 박스 디자인을 다음 것으로 바꾸고 config.json 에 저장한다."""
+        try:
+            config = load_config(self.config_dir)
+        except ValueError as error:
+            self.notice = t("cli.error", message=str(error))
+            return
+        names = list(BOX_STYLES)
+        current = config.get("box_style", DEFAULT_BOX_STYLE)
+        index = names.index(current) if current in names else names.index(DEFAULT_BOX_STYLE)
+        config["box_style"] = names[(index + 1) % len(names)]
+        save_config(self.config_dir, config)
+        self.notice = t("box.changed", style=config["box_style"])
+
+    def counter_is_running(self):
+        return self.state.read_counter_state()["started_at"] is not None
+
+    def timer_is_running(self, now):
+        timer = self.state.read_timer(DEFAULT_TIMER_SECONDS)
+        return timer["status"] == "running" and now < timer["end_at"]
+
     def counter_text(self, now):
         """카운터 값. 실행 중이면 ▶, 멈춰 있으면 || 를 붙인다."""
         counter = self.state.read_counter_state()
@@ -747,6 +777,9 @@ class Host:
             return
         if key in ("t", "T", "ㅅ"):
             timer = self.state.read_timer(default_seconds)
+            if timer["status"] != "running" and self.counter_is_running():
+                self.notice = t("exclusive.counter_running")
+                return
             if timer["status"] == "running":
                 timer = timer_pause(timer, now)
             else:
@@ -755,7 +788,11 @@ class Host:
         elif key in ("r", "R", "ㄱ"):
             self.state.write_timer(timer_reset(default_seconds))
         elif key in ("c", "C", "ㅊ"):
-            self.state.write_counter_state(counter_toggle(self.state.read_counter_state(), now))
+            counter = self.state.read_counter_state()
+            if counter["started_at"] is None and self.timer_is_running(now):
+                self.notice = t("exclusive.timer_running")
+                return
+            self.state.write_counter_state(counter_toggle(counter, now))
         elif key in ("+", "="):
             self.state.write_counter_state(counter_adjust(self.state.read_counter_state(), now, 1))
         elif key == "-":
@@ -766,6 +803,8 @@ class Host:
             self.notice = ""
         elif key in ("x", "X"):
             self.remove_last_zone()
+        elif key in ("b", "B", "ㅠ"):
+            self.change_box_style()
         elif key == "0":
             self.state.write_counter_state({"value": 0, "started_at": None})
 
@@ -794,6 +833,7 @@ class Host:
             panel_row("  " + t("keys.timer")),
             panel_row("  " + t("keys.counter")),
             panel_row("  " + t("keys.world")),
+            panel_row("  " + t("keys.box")),
             "╰" + "─" * inner + "╯",
         ]
         if self.mark:

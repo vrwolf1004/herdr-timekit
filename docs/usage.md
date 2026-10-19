@@ -34,6 +34,7 @@ Click the timekit pane to focus it, then press:
 | `0` | | reset to 0 | |
 | `w` | | | add a time zone (type the name, Enter to add, Esc to cancel) |
 | `x` | | | remove the last time zone |
+| `b` | | | change the clock design (cycles through the box styles, saved to `box_style`) |
 
 Korean keyboard input also works: `ㅅ` for `t`, `ㄱ` for `r`, `ㅈ` for `w`, `ㅊ` for `c`.
 

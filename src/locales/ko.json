@@ -29,5 +29,9 @@
   "world.prompt": "시간대: {value}",
   "world.added": "{zone} 추가됨",
   "world.removed": "{zone} 삭제됨",
-  "world.empty": "삭제할 시간대가 없습니다"
+  "world.empty": "삭제할 시간대가 없습니다",
+  "exclusive.counter_running": "카운터가 진행 중입니다. 먼저 정지하세요",
+  "exclusive.timer_running": "타이머가 진행 중입니다. 먼저 일시정지하세요",
+  "keys.box": "[b] 시계 디자인 변경",
+  "box.changed": "시계 디자인: {style}"
 }

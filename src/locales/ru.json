@@ -29,5 +29,9 @@
   "world.prompt": "Часовой пояс: {value}",
   "world.added": "добавлен {zone}",
   "world.removed": "удалён {zone}",
-  "world.empty": "нет часовых поясов для удаления"
+  "world.empty": "нет часовых поясов для удаления",
+  "exclusive.counter_running": "счётчик запущен, сначала остановите его",
+  "exclusive.timer_running": "таймер запущен, сначала поставьте его на паузу",
+  "keys.box": "[b] сменить дизайн часов",
+  "box.changed": "дизайн часов: {style}"
 }

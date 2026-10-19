@@ -29,5 +29,9 @@
   "world.prompt": "Time zone: {value}",
   "world.added": "added {zone}",
   "world.removed": "removed {zone}",
-  "world.empty": "no time zone to remove"
+  "world.empty": "no time zone to remove",
+  "exclusive.counter_running": "counter is running, stop it first",
+  "exclusive.timer_running": "timer is running, pause it first",
+  "keys.box": "[b] change clock design",
+  "box.changed": "clock design: {style}"
 }

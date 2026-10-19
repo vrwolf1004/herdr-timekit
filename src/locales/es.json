@@ -29,5 +29,9 @@
   "world.prompt": "Zona horaria: {value}",
   "world.added": "{zone} añadida",
   "world.removed": "{zone} quitada",
-  "world.empty": "no hay zonas horarias que quitar"
+  "world.empty": "no hay zonas horarias que quitar",
+  "exclusive.counter_running": "el contador está en marcha, deténlo primero",
+  "exclusive.timer_running": "el temporizador está en marcha, pausa primero",
+  "keys.box": "[b] cambiar diseño del reloj",
+  "box.changed": "diseño del reloj: {style}"
 }

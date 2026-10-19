@@ -29,5 +29,9 @@
   "world.prompt": "Zeitzone: {value}",
   "world.added": "{zone} hinzugefügt",
   "world.removed": "{zone} entfernt",
-  "world.empty": "keine Zeitzone zum Entfernen"
+  "world.empty": "keine Zeitzone zum Entfernen",
+  "exclusive.counter_running": "Zähler läuft, bitte zuerst stoppen",
+  "exclusive.timer_running": "Timer läuft, bitte zuerst pausieren",
+  "keys.box": "[b] Uhr-Design ändern",
+  "box.changed": "Uhr-Design: {style}"
 }
