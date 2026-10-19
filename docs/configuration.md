@@ -58,3 +58,19 @@ On a holiday, the sidebar time gets the holiday's emoji in front (for example `�
 - The file covers 2026 only. Lunar holidays (설날, 부처님오신날, 추석) change every year, so add the next year's dates before then.
 
 The file must contain a JSON object. Otherwise the command exits with an error.
+
+### Language
+
+`lang` sets the language of the detail screen, the sidebar box labels, and the command messages.
+
+Supported: `en`, `ko`, `ru`, `fr`, `es`, `de`, `ja`.
+
+The language is chosen in this order:
+
+1. The `HERDR_TIMEKIT_LANG` environment variable
+2. `"lang"` in `config.json`
+3. The OS language (Windows UI language, or `LC_ALL` / `LC_MESSAGES` / `LANG`)
+4. English (`en`)
+
+Missing translations fall back to English. Translations live in `src/locales/<language>.json`.
+Holiday names come from `holidays.json`: `name` (Korean) and `name_en` (English). Other languages show the English name.

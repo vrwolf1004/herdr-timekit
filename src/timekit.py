@@ -31,6 +31,8 @@ from datetime import datetime
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import herdr_api
+import i18n
+from i18n import t
 
 PLUGIN_ID = "herdr-timekit"
 SOURCE = f"plugin:{PLUGIN_ID}"
@@ -164,14 +166,14 @@ def watch_lines(moment, mark, box_style=DEFAULT_BOX_STYLE, timer_label=None):
     timer_label 이 있으면 시각 자리에 타이머 값을, 날짜 자리에 TIMER 를 넣는다."""
     style = BOX_STYLES.get(box_style, BOX_STYLES[DEFAULT_BOX_STYLE])
     top_left, top_right, bottom_left, bottom_right = style["corners"]
-    period = "PM" if moment.hour >= 12 else "AM"
+    period = t("box.pm") if moment.hour >= 12 else t("box.am")
     time_text = f"{period} {moment.hour % 12 or 12}:{moment.minute:02d}"
     date_text = moment.strftime("%m/%d")
     if mark:
         date_text = f"{mark['emoji']} {date_text}"
     if timer_label:
         time_text = timer_label
-        date_text = "TIMER"
+        date_text = t("box.timer")
     width = max(display_width(time_text), display_width(date_text)) + 6
     ornament = style["ornament"]
     count = width // (display_width(ornament) + 1)
@@ -678,31 +680,33 @@ class Host:
 
     def draw(self, tokens):
         inner = PANEL_INNER
-        timer_state = TIMER_STATUS_TEXT.get(self.timer_status, self.timer_status)
-        counter_state = "counting" if self.state.read_counter_state()["started_at"] is not None else "stopped"
+        status = {"idle": "ready"}.get(self.timer_status, self.timer_status)
+        timer_state = t("status." + status)
+        counter_state = t("status.counting") if self.state.read_counter_state()["started_at"] is not None else t("status.stopped")
         lines = [
             "╭" + "─" * inner + "╮",
             panel_row(center("🌸  herdr-timekit  🌸", inner - 1)),
             "├" + "─" * inner + "┤",
-            panel_row("🕒 TIME"),
-            panel_row("  " + pad_to("NOW", 10) + tokens["tk_now"]),
-            panel_row("🌐 " + pad_to("WORLD", 9) + tokens["tk_world"]),
+            panel_row("🕒 " + t("section.time")),
+            panel_row("  " + pad_to(t("row.now"), 10) + tokens["tk_now"]),
+            panel_row("🌐 " + pad_to(t("row.world"), 9) + tokens["tk_world"]),
             "├" + "─" * inner + "┤",
-            panel_row("⏳ TIMER"),
-            panel_row("  " + pad_to("VALUE", 10) + pad_to(tokens["tk_timer"], 16) + timer_state),
-            panel_row("  " + pad_to("PROGRESS", 10) + self.timer_progress),
+            panel_row("⏳ " + t("section.timer")),
+            panel_row("  " + pad_to(t("row.value"), 10) + pad_to(tokens["tk_timer"], 16) + timer_state),
+            panel_row("  " + pad_to(t("row.progress"), 10) + self.timer_progress),
             "├" + "─" * inner + "┤",
-            panel_row("🔢 COUNTER"),
-            panel_row("  " + pad_to("VALUE", 10) + pad_to(tokens["tk_counter"], 16) + counter_state),
+            panel_row("🔢 " + t("section.counter")),
+            panel_row("  " + pad_to(t("row.value"), 10) + pad_to(tokens["tk_counter"], 16) + counter_state),
             "├" + "─" * inner + "┤",
-            panel_row("  t  start/pause      r  reset timer"),
-            panel_row("  c  start/pause      + -  change   0  reset"),
+            panel_row("  " + t("keys.timer")),
+            panel_row("  " + t("keys.counter")),
             "╰" + "─" * inner + "╯",
         ]
         if self.mark:
-            lines.append(f"  holiday  {self.mark['emoji']} {self.mark['name']}")
+            name = self.mark["name"] if i18n.language() == "ko" else self.mark.get("name_en", self.mark["name"])
+            lines.append(f"  {t('holiday.label')}  {self.mark['emoji']} {name}")
         if self.config_error:
-            lines += ["", f"  config error: {self.config_error}"]
+            lines += ["", f"  {t('config.error')}: {self.config_error}"]
         sys.stdout.write("\x1b[H\x1b[2J" + "\n".join(lines) + "\n")
         sys.stdout.flush()
 
@@ -783,32 +787,32 @@ def cmd_world(args):
         return 1
     zones = list(config.get("timezones", []))
     if args.action == "list":
-        print("\n".join(zones) if zones else "(none)")
+        print("\n".join(zones) if zones else t("cli.none"))
         return 0
     if args.action == "clear":
         zones = []
     else:
         if not args.value:
-            print(f"timekit: world-{args.action} needs a time zone name, e.g. Asia/Seoul", file=sys.stderr)
+            print(t("cli.error", message=t("cli.world_needs_zone", action=args.action)), file=sys.stderr)
             return 1
         if args.action == "add":
             try:
                 ZoneInfo(args.value)
             except (ZoneInfoNotFoundError, ValueError):
-                print(f"timekit: unknown time zone '{args.value}'", file=sys.stderr)
+                print(t("cli.error", message=t("cli.unknown_zone", zone=args.value)), file=sys.stderr)
                 return 1
             if args.value in zones:
-                print(f"timekit: {args.value} is already in the list")
+                print(t("cli.error", message=t("cli.already", zone=args.value)))
                 return 0
             zones.append(args.value)
         else:
             if args.value not in zones:
-                print(f"timekit: {args.value} is not in the list", file=sys.stderr)
+                print(t("cli.error", message=t("cli.not_in_list", zone=args.value)), file=sys.stderr)
                 return 1
             zones.remove(args.value)
     config["timezones"] = zones
     save_config(args.config, config)
-    print("\n".join(zones) if zones else "(none)")
+    print("\n".join(zones) if zones else t("cli.none"))
     return 0
 
 
@@ -834,6 +838,8 @@ def main(argv=None):
     parser.add_argument("--config", default=default_config_dir())
     parser.add_argument("--pane", default=os.environ.get("HERDR_PANE_ID"))
     args = parser.parse_args(argv)
+    os.environ.setdefault("HERDR_PLUGIN_CONFIG_DIR", args.config)
+    i18n.set_language(i18n.detect())
     args.action = args.command.split("-", 1)[1] if "-" in args.command else None
     commands = {
         "ensure": cmd_ensure,
