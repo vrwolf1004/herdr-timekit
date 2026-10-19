@@ -13,12 +13,11 @@ Detail panel (opened in the timekit pane):
 │             🌸  herdr-timekit  🌸            │
 ├──────────────────────────────────────────────┤
 │ 🕒 TIME                                      │
-│   NOW       15:58                            │
+│   NOW       16:02                            │
 │ 🌐 WORLD    Seoul          16:02 KST         │
 │             New York       03:02 EDT         │
 │             Tokyo          16:02 JST         │
 │             Paris          09:02 CEST        │
-│             +2 more                          │
 ├──────────────────────────────────────────────┤
 │ ⏳ TIMER                                     │
 │   VALUE     25:00           ready            │
@@ -30,21 +29,22 @@ Detail panel (opened in the timekit pane):
 │   [t] start/pause   [r] reset                │
 │   [c] start/pause   [+ -] change   [0] reset │
 │   [w] add zone   [x] remove last             │
+│   [b] change clock design                    │
 ╰──────────────────────────────────────────────╯
 ```
 
-Sidebar block (watch-style box, `box_style: emoji_flower`):
+Sidebar block (watch-style box, `box_style: emoji_tulip`, one of ten styles):
 
 ```
 ╔═════════════╗
-║ 🌸 🌸 🌸 🌸 ║
-║   PM 3:58   ║
+║ 🌷 🌷 🌷 🌷 ║
+║   PM 4:02   ║
 ║    10/19    ║
-║ 🌸 🌸 🌸 🌸 ║
+║ 🌷 🌷 🌷 🌷 ║
 ╚═════════════╝
 ```
 
-The box shows the time and date. While the timer runs, it shows the timer value instead. Holidays add an emoji before the date.
+The box shows the time and date. While the timer runs, it shows the timer value instead. Holidays add an emoji before the date. Press `b` in the panel to change the design.
 
 ## Installation
 
