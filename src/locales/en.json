@@ -13,7 +13,7 @@
   "status.counting": "counting",
   "status.stopped": "stopped",
   "keys.timer": "[t] start/pause   [r] reset",
-  "keys.counter": "[c] start/pause   [+ -] change   [0] reset",
+  "keys.counter": "[c] start/pause   [0] reset",
   "holiday.label": "holiday",
   "config.error": "config error",
   "box.am": "AM",
@@ -33,5 +33,7 @@
   "exclusive.counter_running": "counter is running, stop it first",
   "exclusive.timer_running": "timer is running, pause it first",
   "keys.box": "[b] change clock design",
-  "box.changed": "clock design: {style}"
+  "box.changed": "clock design: {style}",
+  "box.counter": "COUNTER",
+  "keys.preset": "[1-6] preset  10s 30s 1m 20m 30m 1h"
 }

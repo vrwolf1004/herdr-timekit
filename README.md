@@ -27,7 +27,7 @@ Detail panel (opened in the timekit pane):
 │   VALUE     0               stopped          │
 ├──────────────────────────────────────────────┤
 │   [t] start/pause   [r] reset                │
-│   [c] start/pause   [+ -] change   [0] reset │
+│   [c] start/pause   [0] reset                │
 │   [w] add zone   [x] remove last             │
 │   [b] change clock design                    │
 ╰──────────────────────────────────────────────╯

@@ -13,7 +13,7 @@
   "status.counting": "contando",
   "status.stopped": "parado",
   "keys.timer": "[t] iniciar/pausa  [r] reiniciar",
-  "keys.counter": "[c] iniciar/pausa  [+ -] cambiar  [0] reset",
+  "keys.counter": "[c] iniciar/pausa  [0] reset",
   "holiday.label": "festivo",
   "config.error": "error de config",
   "box.am": "AM",
@@ -33,5 +33,7 @@
   "exclusive.counter_running": "el contador está en marcha, deténlo primero",
   "exclusive.timer_running": "el temporizador está en marcha, pausa primero",
   "keys.box": "[b] cambiar diseño del reloj",
-  "box.changed": "diseño del reloj: {style}"
+  "box.changed": "diseño del reloj: {style}",
+  "box.counter": "CONTADOR",
+  "keys.preset": "[1-6] preajuste  10s 30s 1m 20m 30m 1h"
 }

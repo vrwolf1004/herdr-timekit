@@ -13,7 +13,7 @@
   "status.counting": "zählt",
   "status.stopped": "gestoppt",
   "keys.timer": "[t] Start/Pause  [r] Zurücksetzen",
-  "keys.counter": "[c] Start/Pause  [+ -] ändern  [0] Reset",
+  "keys.counter": "[c] Start/Pause  [0] Reset",
   "holiday.label": "Feiertag",
   "config.error": "Konfigurationsfehler",
   "box.am": "AM",
@@ -33,5 +33,7 @@
   "exclusive.counter_running": "Zähler läuft, bitte zuerst stoppen",
   "exclusive.timer_running": "Timer läuft, bitte zuerst pausieren",
   "keys.box": "[b] Uhr-Design ändern",
-  "box.changed": "Uhr-Design: {style}"
+  "box.changed": "Uhr-Design: {style}",
+  "box.counter": "ZÄHLER",
+  "keys.preset": "[1-6] Voreinstellung  10s 30s 1m 20m 30m 1h"
 }

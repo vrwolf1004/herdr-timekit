@@ -13,7 +13,7 @@
   "status.counting": "счёт",
   "status.stopped": "стоп",
   "keys.timer": "[t] старт/пауза  [r] сброс",
-  "keys.counter": "[c] старт/пауза  [+ -] изм.  [0] сброс",
+  "keys.counter": "[c] старт/пауза  [0] сброс",
   "holiday.label": "праздник",
   "config.error": "ошибка настроек",
   "box.am": "AM",
@@ -33,5 +33,7 @@
   "exclusive.counter_running": "счётчик запущен, сначала остановите его",
   "exclusive.timer_running": "таймер запущен, сначала поставьте его на паузу",
   "keys.box": "[b] сменить дизайн часов",
-  "box.changed": "дизайн часов: {style}"
+  "box.changed": "дизайн часов: {style}",
+  "box.counter": "СЧЁТЧИК",
+  "keys.preset": "[1-6] пресет  10с 30с 1м 20м 30м 1ч"
 }

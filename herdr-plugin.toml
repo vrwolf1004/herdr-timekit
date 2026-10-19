@@ -35,20 +35,6 @@ contexts = ["global"]
 command = ["python3", "-X", "utf8", "src/timekit.py", "stop"]
 
 [[actions]]
-id = "counter-inc"
-title = "timekit: counter +1"
-platforms = ["linux", "macos"]
-contexts = ["global"]
-command = ["python3", "-X", "utf8", "src/timekit.py", "counter-inc"]
-
-[[actions]]
-id = "counter-dec"
-title = "timekit: counter -1"
-platforms = ["linux", "macos"]
-contexts = ["global"]
-command = ["python3", "-X", "utf8", "src/timekit.py", "counter-dec"]
-
-[[actions]]
 id = "counter-reset"
 title = "timekit: counter reset"
 platforms = ["linux", "macos"]
@@ -100,20 +86,6 @@ title = "timekit: hide time block"
 platforms = ["windows"]
 contexts = ["global"]
 command = ["python", "-X", "utf8", "src/timekit.py", "stop"]
-
-[[actions]]
-id = "counter-inc-windows"
-title = "timekit: counter +1"
-platforms = ["windows"]
-contexts = ["global"]
-command = ["python", "-X", "utf8", "src/timekit.py", "counter-inc"]
-
-[[actions]]
-id = "counter-dec-windows"
-title = "timekit: counter -1"
-platforms = ["windows"]
-contexts = ["global"]
-command = ["python", "-X", "utf8", "src/timekit.py", "counter-dec"]
 
 [[actions]]
 id = "counter-reset-windows"

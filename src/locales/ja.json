@@ -13,7 +13,7 @@
   "status.counting": "カウント中",
   "status.stopped": "停止",
   "keys.timer": "[t] 開始/一時停止   [r] リセット",
-  "keys.counter": "[c] 開始/停止  [+ -] 増減  [0] リセット",
+  "keys.counter": "[c] 開始/停止  [0] リセット",
   "holiday.label": "祝日",
   "config.error": "設定エラー",
   "box.am": "午前",
@@ -33,5 +33,7 @@
   "exclusive.counter_running": "カウンターが実行中です。先に停止してください",
   "exclusive.timer_running": "タイマーが実行中です。先に一時停止してください",
   "keys.box": "[b] 時計のデザイン変更",
-  "box.changed": "時計のデザイン: {style}"
+  "box.changed": "時計のデザイン: {style}",
+  "box.counter": "カウンター",
+  "keys.preset": "[1-6] 設定 10秒 30秒 1分 20分 30分 1時間"
 }

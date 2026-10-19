@@ -13,7 +13,7 @@
   "status.counting": "카운트 중",
   "status.stopped": "정지",
   "keys.timer": "[t] 시작/정지   [r] 초기화",
-  "keys.counter": "[c] 시작/정지   [+ -] 증감   [0] 초기화",
+  "keys.counter": "[c] 시작/정지   [0] 초기화",
   "holiday.label": "휴일",
   "config.error": "설정 오류",
   "box.am": "오전",
@@ -33,5 +33,7 @@
   "exclusive.counter_running": "카운터가 진행 중입니다. 먼저 정지하세요",
   "exclusive.timer_running": "타이머가 진행 중입니다. 먼저 일시정지하세요",
   "keys.box": "[b] 시계 디자인 변경",
-  "box.changed": "시계 디자인: {style}"
+  "box.changed": "시계 디자인: {style}",
+  "box.counter": "카운터",
+  "keys.preset": "[1-6] 프리셋  10초 30초 1분 20분 30분 1시간"
 }

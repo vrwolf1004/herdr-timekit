@@ -28,9 +28,9 @@ Click the timekit pane to focus it, then press:
 | Key | Timer | Counter | World clocks |
 |-----|-------|---------|--------------|
 | `t` | start / pause | | |
+| `1`–`6` | preset: 10s, 30s, 1m, 20m, 30m, 1h (stopped timer only) | | |
 | `r` | reset timer | | |
 | `c` | | start / pause (counts up once per second) | |
-| `+` / `-` | | change by one | |
 | `0` | | reset to 0 | |
 | `w` | | | add a time zone (type the name, Enter to add, Esc to cancel) |
 | `x` | | | remove the last time zone |
@@ -63,7 +63,7 @@ python -X utf8 src/timekit.py <command>
 |---------|--------------|
 | `ensure` | Start the timekit block if it is not running |
 | `stop` | Stop the block |
-| `counter-inc` / `counter-dec` / `counter-reset` | Change the counter |
+| `counter-reset` | Reset the counter to 0 |
 | `timer-start` / `timer-pause` / `timer-reset` | Control the timer |
 | `world-add <zone>` | Add a time zone |
 | `world-remove <zone>` | Remove a time zone |

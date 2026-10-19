@@ -13,7 +13,7 @@
   "status.counting": "comptage",
   "status.stopped": "arrêté",
   "keys.timer": "[t] lancer/pause  [r] réinit.",
-  "keys.counter": "[c] lancer/pause  [+ -] modif.  [0] réinit.",
+  "keys.counter": "[c] lancer/pause  [0] réinit.",
   "holiday.label": "jour férié",
   "config.error": "erreur de config",
   "box.am": "AM",
@@ -33,5 +33,7 @@
   "exclusive.counter_running": "le compteur tourne, arrêtez-le d'abord",
   "exclusive.timer_running": "la minuterie tourne, mettez-la en pause d'abord",
   "keys.box": "[b] changer le design",
-  "box.changed": "design de l'horloge : {style}"
+  "box.changed": "design de l'horloge : {style}",
+  "box.counter": "COMPTEUR",
+  "keys.preset": "[1-6] préréglage  10s 30s 1m 20m 30m 1h"
 }

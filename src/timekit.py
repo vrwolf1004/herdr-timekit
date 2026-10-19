@@ -12,8 +12,6 @@
   ensure          workspace 와 host 를 확인하고 없으면 띄운다 (startup / event hook)
   stop            host 를 멈추고 자기 pane 을 닫는다 (dock 이 비면 workspace 도 닫는다)
   host            timekit pane 안에서 도는 루프. 상세 화면 표시 + 사이드바 토큰 갱신
-  counter-inc     카운터 +1
-  counter-dec     카운터 -1
   counter-reset   카운터를 0으로
   timer-start     타이머 시작 (멈춘 상태면 이어서, 끝났거나 처음이면 기본 시간부터)
   timer-pause     타이머 일시정지
@@ -55,6 +53,8 @@ TOKEN_TTL_MS = 15_000         # host 가 죽으면 토큰이 이 시간 뒤 사�
 LAYOUT_EVERY_TICKS = 5        # 맨 아래 위치 확인, agent 재등록 주기
 MAX_SOCKET_FAILURES = 10
 DEFAULT_TIMER_SECONDS = 1500
+# 키 1~6 으로 고르는 타이머 프리셋 (초)
+TIMER_PRESETS = {"1": 10, "2": 30, "3": 60, "4": 1200, "5": 1800, "6": 3600}
 # now_style 설정으로 고르는 현재 시간 표시 형식. 초는 표시하지 않는다. 모르는 값이면 기본(hm)을 쓴다.
 # kor12 는 한국어 오전/오후 표기라 아래 now_text 에서 따로 만든다.
 NOW_STYLES = {
@@ -142,7 +142,8 @@ def timer_bar(timer, now, default_seconds, width=PROGRESS_WIDTH):
         remaining = 0.0
     else:
         remaining = float(timer["remaining"])
-    fraction = min(1.0, remaining / default_seconds) if default_seconds else 0.0
+    total = timer.get("total", default_seconds)
+    fraction = min(1.0, remaining / total) if total else 0.0
     filled = round(fraction * width)
     return "█" * filled + "░" * (width - filled)
 
@@ -169,7 +170,7 @@ BOX_STYLES = {
 DEFAULT_BOX_STYLE = "double_star"
 
 
-def watch_lines(moment, mark, box_style=DEFAULT_BOX_STYLE, timer_label=None):
+def watch_lines(moment, mark, box_style=DEFAULT_BOX_STYLE, timer_label=None, counter_label=None):
     """선택한 테두리 안에 장식, 시각, 날짜, 장식을 넣은 여섯 줄을 돌려준다. 휴일이면 날짜 앞에 이모지를 붙인다.
     timer_label 이 있으면 시각 자리에 타이머 값을, 날짜 자리에 TIMER 를 넣는다."""
     style = BOX_STYLES.get(box_style, BOX_STYLES[DEFAULT_BOX_STYLE])
@@ -179,7 +180,10 @@ def watch_lines(moment, mark, box_style=DEFAULT_BOX_STYLE, timer_label=None):
     date_text = moment.strftime("%m/%d")
     if mark:
         date_text = f"{mark['emoji']} {date_text}"
-    if timer_label:
+    if counter_label:
+        time_text = counter_label
+        date_text = t("box.counter")
+    elif timer_label:
         time_text = timer_label
         date_text = t("box.timer")
     width = max(display_width(time_text), display_width(date_text)) + 6
@@ -301,7 +305,7 @@ class State:
             and isinstance(timer.get("remaining"), (int, float))
         )
         if not valid:
-            return {"status": "idle", "remaining": default_seconds, "end_at": None}
+            return {"status": "idle", "remaining": default_seconds, "end_at": None, "total": default_seconds}
         return timer
 
     def write_timer(self, timer):
@@ -377,8 +381,9 @@ def expire_timer(timer, now):
 def timer_start(timer, now, default_seconds):
     if timer["status"] == "running":
         return timer
-    remaining = timer["remaining"] if timer["status"] == "paused" else default_seconds
-    return {"status": "running", "remaining": remaining, "end_at": now + remaining}
+    remaining = timer["remaining"] if timer["status"] in ("idle", "paused") else default_seconds
+    total = timer.get("total", remaining) if timer["status"] in ("idle", "paused") else remaining
+    return {"status": "running", "remaining": remaining, "end_at": now + remaining, "total": total}
 
 
 def counter_value(counter, now):
@@ -395,21 +400,15 @@ def counter_toggle(counter, now):
     return {"value": counter_value(counter, now), "started_at": None}
 
 
-def counter_adjust(counter, now, delta):
-    """값을 delta 만큼 바꾼다. 실행 중이면 실행 상태를 그대로 둔다."""
-    value = counter_value(counter, now) + delta
-    return {"value": value, "started_at": now if counter["started_at"] is not None else None}
-
-
 def timer_pause(timer, now):
     if timer["status"] != "running":
         return timer
     remaining = max(0.0, timer["end_at"] - now)
-    return {"status": "paused", "remaining": remaining, "end_at": None}
+    return {"status": "paused", "remaining": remaining, "end_at": None, "total": timer.get("total", remaining)}
 
 
 def timer_reset(default_seconds):
-    return {"status": "idle", "remaining": default_seconds, "end_at": None}
+    return {"status": "idle", "remaining": default_seconds, "end_at": None, "total": default_seconds}
 
 
 # ---------------------------------------------------------------- workspace / pane
@@ -534,10 +533,8 @@ def cmd_counter(args):
     counter = state.read_counter_state()
     if args.action == "reset":
         counter = {"value": 0, "started_at": None}
-    elif args.action == "start":
-        counter = counter_toggle(counter, now)
     else:
-        counter = counter_adjust(counter, now, 1 if args.action == "inc" else -1)
+        counter = counter_toggle(counter, now)
     state.write_counter_state(counter)
     return 0
 
@@ -620,7 +617,8 @@ class Host:
             "tk_timer": timer_text(timer, now),
         }
         timer_label = self.timer_label if self.timer_status != "idle" else None
-        box = watch_lines(moment, mark, config.get("box_style", DEFAULT_BOX_STYLE), timer_label)
+        counter_label = f"# {self.counter_value_now}" if self.counter_active else None
+        box = watch_lines(moment, mark, config.get("box_style", DEFAULT_BOX_STYLE), timer_label, counter_label)
         counter = self.state.read_counter_state()
         self.counter_active = counter["started_at"] is not None
         self.counter_value_now = counter_value(counter, now)
@@ -631,12 +629,6 @@ class Host:
 
     def display_name(self):
         """돌고 있는 타이머 또는 카운터 값을 에이전트 이름에 붙인다. 둘 다 멈춰 있으면 이름만 쓴다."""
-        if self.timer_status == "running":
-            return f"{DISPLAY_AGENT} {self.timer_label}"
-        if self.counter_active:
-            return f"{DISPLAY_AGENT} # {self.counter_value_now}"
-        if self.timer_status != "idle":
-            return f"{DISPLAY_AGENT} {self.timer_label}"
         return DISPLAY_AGENT
 
     def agent_state(self):
@@ -775,7 +767,12 @@ class Host:
         if self.input_mode:
             self.handle_input(key, config)
             return
-        if key in ("t", "T", "ㅅ"):
+        if key in TIMER_PRESETS:
+            if self.timer_is_running(now):
+                self.notice = t("exclusive.timer_running")
+                return
+            self.state.write_timer(timer_reset(TIMER_PRESETS[key]))
+        elif key in ("t", "T", "ㅅ"):
             timer = self.state.read_timer(default_seconds)
             if timer["status"] != "running" and self.counter_is_running():
                 self.notice = t("exclusive.counter_running")
@@ -793,10 +790,6 @@ class Host:
                 self.notice = t("exclusive.timer_running")
                 return
             self.state.write_counter_state(counter_toggle(counter, now))
-        elif key in ("+", "="):
-            self.state.write_counter_state(counter_adjust(self.state.read_counter_state(), now, 1))
-        elif key == "-":
-            self.state.write_counter_state(counter_adjust(self.state.read_counter_state(), now, -1))
         elif key in ("w", "W", "ㅈ"):
             self.input_mode = "world"
             self.input_text = ""
@@ -831,6 +824,7 @@ class Host:
             panel_row("  " + pad_to(t("row.value"), 10) + pad_to(tokens["tk_counter"], 16) + counter_state),
             "├" + "─" * inner + "┤",
             panel_row("  " + t("keys.timer")),
+            panel_row("  " + t("keys.preset")),
             panel_row("  " + t("keys.counter")),
             panel_row("  " + t("keys.world")),
             panel_row("  " + t("keys.box")),
@@ -982,7 +976,7 @@ def cmd_host(args):
 def main(argv=None):
     parser = argparse.ArgumentParser(prog=PLUGIN_ID)
     parser.add_argument("command", choices=[
-        "ensure", "stop", "host", "counter-inc", "counter-dec", "counter-reset",
+        "ensure", "stop", "host", "counter-reset",
         "timer-start", "timer-pause", "timer-reset",
         "world-add", "world-remove", "world-clear", "world-list",
     ])
@@ -998,8 +992,6 @@ def main(argv=None):
         "ensure": cmd_ensure,
         "stop": cmd_stop,
         "host": cmd_host,
-        "counter-inc": cmd_counter,
-        "counter-dec": cmd_counter,
         "counter-reset": cmd_counter,
         "timer-start": cmd_timer,
         "timer-pause": cmd_timer,
