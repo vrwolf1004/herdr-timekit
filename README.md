@@ -14,10 +14,10 @@ Detail panel (opened in the timekit pane):
 ├──────────────────────────────────────────────┤
 │ 🕒 TIME                                      │
 │   NOW       16:02                            │
-│ 🌐 WORLD    Seoul          16:02 KST         │
-│             New York       03:02 EDT         │
-│             Tokyo          16:02 JST         │
-│             Paris          09:02 CEST        │
+│ 🌐 WORLD    Seoul          17:23 KST         │
+│             New York       04:23 EDT         │
+│             Tokyo          17:23 JST         │
+│             Paris          10:23 CEST        │
 ├──────────────────────────────────────────────┤
 │ ⏳ TIMER                                     │
 │   VALUE     25:00           ready            │
@@ -27,6 +27,7 @@ Detail panel (opened in the timekit pane):
 │   VALUE     0               stopped          │
 ├──────────────────────────────────────────────┤
 │   [t] start/pause   [r] reset                │
+│   [1-6] preset  10s 30s 1m 20m 30m 1h        │
 │   [c] start/pause   [0] reset                │
 │   [w] add zone   [x] remove last             │
 │   [b] change clock design                    │
@@ -44,7 +45,7 @@ Sidebar block (watch-style box, `box_style: emoji_tulip`, one of ten styles):
 ╚═════════════╝
 ```
 
-The box shows the time and date. While the timer runs, it shows the timer value instead. Holidays add an emoji before the date. Press `b` in the panel to change the design.
+The box shows the time and date. While the timer runs, it shows the timer value. While the counter runs, it shows the counter value. When the timer ends, the text blinks between `* done *` and `  done  `. Press `b` in the panel to change the design.
 
 ## Installation
 
