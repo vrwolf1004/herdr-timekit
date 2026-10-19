@@ -28,11 +28,19 @@ import sys
 import time
 import unicodedata
 from datetime import datetime
+import zoneinfo
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import herdr_api
 import i18n
 from i18n import t
+
+# 입력줄에서 쓰는 제어 문자
+CR = chr(13)
+LF = chr(10)
+ESC = chr(27)
+BS = chr(8)
+DEL = chr(127)
 
 PLUGIN_ID = "herdr-timekit"
 SOURCE = f"plugin:{PLUGIN_ID}"
@@ -339,6 +347,25 @@ def world_text(timezones):
     return " ".join(parts) if parts else "-"
 
 
+def world_lines(zones, limit=4):
+    """세계 시간을 패널 한 줄씩 나눈다. 도시 이름, 시각, 약어 순서이며 limit 을 넘는 시간대는 개수만 적는다."""
+    if not zones:
+        return ["-"]
+    now = datetime.now()
+    rows = []
+    for name in zones[:limit]:
+        try:
+            local = now.astimezone(ZoneInfo(name))
+        except (ZoneInfoNotFoundError, ValueError, TypeError):
+            rows.append(f"{name} ??")
+            continue
+        city = name.split("/")[-1].replace("_", " ")
+        rows.append(f"{city:<14} {local:%H:%M} {local.tzname()}")
+    if len(zones) > limit:
+        rows.append(f"+{len(zones) - limit} more")
+    return rows
+
+
 def expire_timer(timer, now):
     """실행 중인 타이머가 끝 시각을 지났으면 done 으로 바꾼다. 바뀌었으면 True 를 돌려준다."""
     if timer["status"] == "running" and now >= timer["end_at"]:
@@ -552,6 +579,9 @@ class Host:
         self.socket_failures = 0
         self.config_error = None
         self.holidays = load_holidays()
+        self.input_mode = None
+        self.input_text = ""
+        self.notice = ""
         self.timer_status = "idle"
         self.timer_label = ""
         self.registered_state = None
@@ -589,6 +619,7 @@ class Host:
         }
         timer_label = self.timer_label if self.timer_status != "idle" else None
         box = watch_lines(moment, mark, config.get("box_style", DEFAULT_BOX_STYLE), timer_label)
+        self.world_lines = world_lines(config.get("timezones", []))
         for index, line in enumerate(box, 1):
             tokens[f"tk_box{index}"] = line
         return tokens
@@ -648,6 +679,57 @@ class Host:
             herdr_api.try_request("pane.send_keys", {"pane_id": pane_id, "keys": [SIDEBAR_HIDE_KEY]})
             self.sidebar_sent[pane_id] = now
 
+    def handle_input(self, key, config):
+        """세계 시간 입력줄에서 누른 키를 처리한다. Enter 는 추가, Esc 는 취소, Backspace 는 한 글자 지움."""
+        if key in (CR, LF):
+            self.input_mode = None
+            self.add_zone(self.input_text.strip())
+            self.input_text = ""
+        elif key == ESC:
+            self.input_mode = None
+            self.input_text = ""
+        elif key in (BS, DEL):
+            self.input_text = self.input_text[:-1]
+        elif key.isprintable() and len(self.input_text) < 64:
+            self.input_text += key
+
+    def add_zone(self, zone):
+        if not zone:
+            self.notice = t("cli.error", message=t("cli.world_needs_zone", action="add"))
+            return
+        resolved = resolve_zone(zone)
+        if resolved is None:
+            self.notice = t("cli.error", message=t("cli.unknown_zone", zone=zone))
+            return
+        zone = resolved
+        try:
+            config = load_config(self.config_dir)
+        except ValueError as error:
+            self.notice = t("cli.error", message=str(error))
+            return
+        zones = list(config.get("timezones", []))
+        if zone in zones:
+            self.notice = t("cli.error", message=t("cli.already", zone=zone))
+            return
+        config["timezones"] = zones + [zone]
+        save_config(self.config_dir, config)
+        self.notice = t("world.added", zone=zone)
+
+    def remove_last_zone(self):
+        try:
+            config = load_config(self.config_dir)
+        except ValueError as error:
+            self.notice = t("cli.error", message=str(error))
+            return
+        zones = list(config.get("timezones", []))
+        if not zones:
+            self.notice = t("world.empty")
+            return
+        removed = zones.pop()
+        config["timezones"] = zones
+        save_config(self.config_dir, config)
+        self.notice = t("world.removed", zone=removed)
+
     def counter_text(self, now):
         """카운터 값. 실행 중이면 ▶, 멈춰 있으면 || 를 붙인다."""
         counter = self.state.read_counter_state()
@@ -660,6 +742,9 @@ class Host:
         """상세 화면에서 누른 키를 타이머(t, r)와 카운터(c, +, -, 0)에 반영한다."""
         now = time.time()
         default_seconds = timer_default_seconds(config)
+        if self.input_mode:
+            self.handle_input(key, config)
+            return
         if key in ("t", "T", "ㅅ"):
             timer = self.state.read_timer(default_seconds)
             if timer["status"] == "running":
@@ -675,11 +760,19 @@ class Host:
             self.state.write_counter_state(counter_adjust(self.state.read_counter_state(), now, 1))
         elif key == "-":
             self.state.write_counter_state(counter_adjust(self.state.read_counter_state(), now, -1))
+        elif key in ("w", "W", "ㅈ"):
+            self.input_mode = "world"
+            self.input_text = ""
+            self.notice = ""
+        elif key in ("x", "X"):
+            self.remove_last_zone()
         elif key == "0":
             self.state.write_counter_state({"value": 0, "started_at": None})
 
     def draw(self, tokens):
         inner = PANEL_INNER
+        world_rows = [panel_row("🌐 " + pad_to(t("row.world"), 9) + self.world_lines[0])]
+        world_rows += [panel_row(" " * 12 + line) for line in self.world_lines[1:]]
         status = {"idle": "ready"}.get(self.timer_status, self.timer_status)
         timer_state = t("status." + status)
         counter_state = t("status.counting") if self.state.read_counter_state()["started_at"] is not None else t("status.stopped")
@@ -689,7 +782,7 @@ class Host:
             "├" + "─" * inner + "┤",
             panel_row("🕒 " + t("section.time")),
             panel_row("  " + pad_to(t("row.now"), 10) + tokens["tk_now"]),
-            panel_row("🌐 " + pad_to(t("row.world"), 9) + tokens["tk_world"]),
+            *world_rows,
             "├" + "─" * inner + "┤",
             panel_row("⏳ " + t("section.timer")),
             panel_row("  " + pad_to(t("row.value"), 10) + pad_to(tokens["tk_timer"], 16) + timer_state),
@@ -700,11 +793,16 @@ class Host:
             "├" + "─" * inner + "┤",
             panel_row("  " + t("keys.timer")),
             panel_row("  " + t("keys.counter")),
+            panel_row("  " + t("keys.world")),
             "╰" + "─" * inner + "╯",
         ]
         if self.mark:
             name = self.mark["name"] if i18n.language() == "ko" else self.mark.get("name_en", self.mark["name"])
             lines.append(f"  {t('holiday.label')}  {self.mark['emoji']} {name}")
+        if self.input_mode:
+            lines.append(f"  {t('world.prompt', value=self.input_text)}_")
+        if self.notice:
+            lines.append(f"  {self.notice}")
         if self.config_error:
             lines += ["", f"  {t('config.error')}: {self.config_error}"]
         sys.stdout.write("\x1b[H\x1b[2J" + "\n".join(lines) + "\n")
@@ -771,6 +869,21 @@ def read_key():
         return ""
 
 
+def resolve_zone(name):
+    """도시 이름(Seoul, new york)이나 시간대 이름(asia/seoul)을 IANA 시간대 이름으로 바꾼다. 대소문자는 구분하지 않는다. 찾지 못하면 None."""
+    key = name.strip().replace(" ", "_").lower()
+    if not key:
+        return None
+    zones = sorted(zoneinfo.available_timezones())
+    by_name = {zone.lower(): zone for zone in zones}
+    if key in by_name:
+        return by_name[key]
+    for zone in zones:
+        if "/" in zone and zone.split("/")[-1].lower() == key:
+            return zone
+    return None
+
+
 def save_config(config_dir, config):
     os.makedirs(config_dir, exist_ok=True)
     with open(os.path.join(config_dir, "config.json"), "w", encoding="utf-8") as file:
@@ -796,11 +909,11 @@ def cmd_world(args):
             print(t("cli.error", message=t("cli.world_needs_zone", action=args.action)), file=sys.stderr)
             return 1
         if args.action == "add":
-            try:
-                ZoneInfo(args.value)
-            except (ZoneInfoNotFoundError, ValueError):
+            resolved = resolve_zone(args.value)
+            if resolved is None:
                 print(t("cli.error", message=t("cli.unknown_zone", zone=args.value)), file=sys.stderr)
                 return 1
+            args.value = resolved
             if args.value in zones:
                 print(t("cli.error", message=t("cli.already", zone=args.value)))
                 return 0

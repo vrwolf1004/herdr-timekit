@@ -24,5 +24,10 @@
   "cli.world_needs_zone": "world-{action} demande un nom de fuseau, ex. Asia/Seoul",
   "cli.unknown_zone": "fuseau inconnu '{zone}'",
   "cli.already": "{zone} est déjà dans la liste",
-  "cli.not_in_list": "{zone} n'est pas dans la liste"
+  "cli.not_in_list": "{zone} n'est pas dans la liste",
+  "keys.world": "[w] ajouter   [x] supprimer dernier",
+  "world.prompt": "Fuseau : {value}",
+  "world.added": "{zone} ajouté",
+  "world.removed": "{zone} supprimé",
+  "world.empty": "aucun fuseau à supprimer"
 }

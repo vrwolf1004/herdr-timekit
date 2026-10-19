@@ -24,5 +24,10 @@
   "cli.world_needs_zone": "world-{action} 명령에는 시간대 이름이 필요합니다. 예: Asia/Seoul",
   "cli.unknown_zone": "알 수 없는 시간대: '{zone}'",
   "cli.already": "{zone} 은(는) 이미 목록에 있습니다",
-  "cli.not_in_list": "{zone} 은(는) 목록에 없습니다"
+  "cli.not_in_list": "{zone} 은(는) 목록에 없습니다",
+  "keys.world": "[w] 시간대 추가   [x] 마지막 삭제",
+  "world.prompt": "시간대: {value}",
+  "world.added": "{zone} 추가됨",
+  "world.removed": "{zone} 삭제됨",
+  "world.empty": "삭제할 시간대가 없습니다"
 }

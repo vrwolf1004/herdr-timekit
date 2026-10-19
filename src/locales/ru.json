@@ -24,5 +24,10 @@
   "cli.world_needs_zone": "для world-{action} нужно название часового пояса, например Asia/Seoul",
   "cli.unknown_zone": "неизвестный часовой пояс '{zone}'",
   "cli.already": "{zone} уже в списке",
-  "cli.not_in_list": "{zone} нет в списке"
+  "cli.not_in_list": "{zone} нет в списке",
+  "keys.world": "[w] добавить   [x] удалить последний",
+  "world.prompt": "Часовой пояс: {value}",
+  "world.added": "добавлен {zone}",
+  "world.removed": "удалён {zone}",
+  "world.empty": "нет часовых поясов для удаления"
 }

@@ -24,5 +24,10 @@
   "cli.world_needs_zone": "world-{action} needs a time zone name, e.g. Asia/Seoul",
   "cli.unknown_zone": "unknown time zone '{zone}'",
   "cli.already": "{zone} is already in the list",
-  "cli.not_in_list": "{zone} is not in the list"
+  "cli.not_in_list": "{zone} is not in the list",
+  "keys.world": "[w] add zone   [x] remove last",
+  "world.prompt": "Time zone: {value}",
+  "world.added": "added {zone}",
+  "world.removed": "removed {zone}",
+  "world.empty": "no time zone to remove"
 }

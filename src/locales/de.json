@@ -24,5 +24,10 @@
   "cli.world_needs_zone": "world-{action} braucht einen Zeitzonennamen, z. B. Asia/Seoul",
   "cli.unknown_zone": "unbekannte Zeitzone '{zone}'",
   "cli.already": "{zone} ist schon in der Liste",
-  "cli.not_in_list": "{zone} ist nicht in der Liste"
+  "cli.not_in_list": "{zone} ist nicht in der Liste",
+  "keys.world": "[w] hinzufügen   [x] entfernen",
+  "world.prompt": "Zeitzone: {value}",
+  "world.added": "{zone} hinzugefügt",
+  "world.removed": "{zone} entfernt",
+  "world.empty": "keine Zeitzone zum Entfernen"
 }

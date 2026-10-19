@@ -24,5 +24,10 @@
   "cli.world_needs_zone": "world-{action} necesita un nombre de zona horaria, p. ej. Asia/Seoul",
   "cli.unknown_zone": "zona horaria desconocida '{zone}'",
   "cli.already": "{zone} ya está en la lista",
-  "cli.not_in_list": "{zone} no está en la lista"
+  "cli.not_in_list": "{zone} no está en la lista",
+  "keys.world": "[w] añadir zona   [x] quitar última",
+  "world.prompt": "Zona horaria: {value}",
+  "world.added": "{zone} añadida",
+  "world.removed": "{zone} quitada",
+  "world.empty": "no hay zonas horarias que quitar"
 }
