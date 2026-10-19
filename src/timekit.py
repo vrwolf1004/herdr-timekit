@@ -617,6 +617,10 @@ class Host:
             "tk_timer": timer_text(timer, now),
         }
         timer_label = self.timer_label if self.timer_status != "idle" else None
+        if self.timer_status == "done":
+            # 끝난 타이머는 1초마다 * 완료 * 와 완료 모양이 번갈아 나와 번쩍인다. 두 모양의 폭은 같다.
+            word = t("status.done")
+            timer_label = ("* " + word + " *") if int(now) % 2 == 0 else ("  " + word + "  ")
         counter_label = f"# {self.counter_value_now}" if self.counter_active else None
         box = watch_lines(moment, mark, config.get("box_style", DEFAULT_BOX_STYLE), timer_label, counter_label)
         counter = self.state.read_counter_state()
