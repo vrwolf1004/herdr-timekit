@@ -1,0 +1,172 @@
+id = "herdr-timekit"
+name = "herdr-timekit"
+version = "0.1.0"
+min_herdr_version = "0.9.0"
+platforms = ["windows", "linux", "macos"]
+description = "Current time, world clocks, counter and timer in one block at the bottom of the herdr sidebar"
+
+# Python 3.9+ 표준 라이브러리만 쓴다(zoneinfo). 실행기 이름이 OS 마다 달라(Windows: python, Linux/macOS: python3)
+# 같은 동작을 OS 별로 선언한다. herdr 는 액션 id 중복을 허용하지 않으므로 Windows 쪽 id 에 -windows 를 붙인다.
+# host 루프는 "herdr-dock" workspace 의 pane 안에서 돌고, hook 은 그 pane 이 살아 있는지만 확인한다.
+
+# ---------------------------------------------------------------- Linux / macOS
+
+[[startup]]
+platforms = ["linux", "macos"]
+command = ["python3", "-X", "utf8", "src/timekit.py", "ensure"]
+
+[[events]]
+on = "workspace.created"
+platforms = ["linux", "macos"]
+command = ["python3", "-X", "utf8", "src/timekit.py", "ensure"]
+
+[[actions]]
+id = "start"
+title = "timekit: show time block"
+platforms = ["linux", "macos"]
+contexts = ["global"]
+command = ["python3", "-X", "utf8", "src/timekit.py", "ensure"]
+
+[[actions]]
+id = "stop"
+title = "timekit: hide time block"
+platforms = ["linux", "macos"]
+contexts = ["global"]
+command = ["python3", "-X", "utf8", "src/timekit.py", "stop"]
+
+[[actions]]
+id = "counter-inc"
+title = "timekit: counter +1"
+platforms = ["linux", "macos"]
+contexts = ["global"]
+command = ["python3", "-X", "utf8", "src/timekit.py", "counter-inc"]
+
+[[actions]]
+id = "counter-dec"
+title = "timekit: counter -1"
+platforms = ["linux", "macos"]
+contexts = ["global"]
+command = ["python3", "-X", "utf8", "src/timekit.py", "counter-dec"]
+
+[[actions]]
+id = "counter-reset"
+title = "timekit: counter reset"
+platforms = ["linux", "macos"]
+contexts = ["global"]
+command = ["python3", "-X", "utf8", "src/timekit.py", "counter-reset"]
+
+[[actions]]
+id = "timer-start"
+title = "timekit: start timer"
+platforms = ["linux", "macos"]
+contexts = ["global"]
+command = ["python3", "-X", "utf8", "src/timekit.py", "timer-start"]
+
+[[actions]]
+id = "timer-pause"
+title = "timekit: pause timer"
+platforms = ["linux", "macos"]
+contexts = ["global"]
+command = ["python3", "-X", "utf8", "src/timekit.py", "timer-pause"]
+
+[[actions]]
+id = "timer-reset"
+title = "timekit: reset timer"
+platforms = ["linux", "macos"]
+contexts = ["global"]
+command = ["python3", "-X", "utf8", "src/timekit.py", "timer-reset"]
+
+# ---------------------------------------------------------------- Windows
+
+[[startup]]
+platforms = ["windows"]
+command = ["python", "-X", "utf8", "src/timekit.py", "ensure"]
+
+[[events]]
+on = "workspace.created"
+platforms = ["windows"]
+command = ["python", "-X", "utf8", "src/timekit.py", "ensure"]
+
+[[actions]]
+id = "start-windows"
+title = "timekit: show time block"
+platforms = ["windows"]
+contexts = ["global"]
+command = ["python", "-X", "utf8", "src/timekit.py", "ensure"]
+
+[[actions]]
+id = "stop-windows"
+title = "timekit: hide time block"
+platforms = ["windows"]
+contexts = ["global"]
+command = ["python", "-X", "utf8", "src/timekit.py", "stop"]
+
+[[actions]]
+id = "counter-inc-windows"
+title = "timekit: counter +1"
+platforms = ["windows"]
+contexts = ["global"]
+command = ["python", "-X", "utf8", "src/timekit.py", "counter-inc"]
+
+[[actions]]
+id = "counter-dec-windows"
+title = "timekit: counter -1"
+platforms = ["windows"]
+contexts = ["global"]
+command = ["python", "-X", "utf8", "src/timekit.py", "counter-dec"]
+
+[[actions]]
+id = "counter-reset-windows"
+title = "timekit: counter reset"
+platforms = ["windows"]
+contexts = ["global"]
+command = ["python", "-X", "utf8", "src/timekit.py", "counter-reset"]
+
+[[actions]]
+id = "timer-start-windows"
+title = "timekit: start timer"
+platforms = ["windows"]
+contexts = ["global"]
+command = ["python", "-X", "utf8", "src/timekit.py", "timer-start"]
+
+[[actions]]
+id = "timer-pause-windows"
+title = "timekit: pause timer"
+platforms = ["windows"]
+contexts = ["global"]
+command = ["python", "-X", "utf8", "src/timekit.py", "timer-pause"]
+
+[[actions]]
+id = "timer-reset-windows"
+title = "timekit: reset timer"
+platforms = ["windows"]
+contexts = ["global"]
+command = ["python", "-X", "utf8", "src/timekit.py", "timer-reset"]
+
+[[actions]]
+id = "world-list"
+title = "timekit: list world clocks"
+platforms = ["linux", "macos"]
+contexts = ["global"]
+command = ["python3", "-X", "utf8", "src/timekit.py", "world-list"]
+
+[[actions]]
+id = "world-clear"
+title = "timekit: clear world clocks"
+platforms = ["linux", "macos"]
+contexts = ["global"]
+command = ["python3", "-X", "utf8", "src/timekit.py", "world-clear"]
+
+[[actions]]
+id = "world-list-windows"
+title = "timekit: list world clocks"
+platforms = ["windows"]
+contexts = ["global"]
+command = ["python", "-X", "utf8", "src/timekit.py", "world-list"]
+
+[[actions]]
+id = "world-clear-windows"
+title = "timekit: clear world clocks"
+platforms = ["windows"]
+contexts = ["global"]
+command = ["python", "-X", "utf8", "src/timekit.py", "world-clear"]
