@@ -12,8 +12,6 @@
   "status.done": "готово",
   "status.counting": "счёт",
   "status.stopped": "стоп",
-  "keys.timer": "[t] старт/пауза  [r] сброс",
-  "keys.counter": "[c] старт/пауза  [0] сброс",
   "holiday.label": "праздник",
   "config.error": "ошибка настроек",
   "box.am": "AM",
@@ -25,15 +23,15 @@
   "cli.unknown_zone": "неизвестный часовой пояс '{zone}'",
   "cli.already": "{zone} уже в списке",
   "cli.not_in_list": "{zone} нет в списке",
-  "keys.world": "[w] добавить   [x] удалить последний",
   "world.prompt": "Часовой пояс: {value}",
   "world.added": "добавлен {zone}",
   "world.removed": "удалён {zone}",
   "world.empty": "нет часовых поясов для удаления",
   "exclusive.counter_running": "счётчик запущен, сначала остановите его",
   "exclusive.timer_running": "таймер запущен, сначала поставьте его на паузу",
-  "keys.box": "[b] сменить дизайн часов",
   "box.changed": "дизайн часов: {style}",
   "box.counter": "СЧЁТЧИК",
-  "keys.preset": "[1-6] пресет  10с 30с 1м 20м 30м 1ч"
+  "keys.row1": "[t] старт/пауза  [r] сброс",
+  "keys.row2": "[c] старт/пауза  [0] сброс",
+  "keys.row3": "[1-6] пресет  [w] добавить  [x] удалить"
 }

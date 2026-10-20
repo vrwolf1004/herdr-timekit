@@ -2,7 +2,15 @@
 
 [**English**](usage.md) | [한국어](usage.ko.md)
 
-## Sidebar setup
+## 1. Install
+
+```sh
+herdr plugin install vrwolf1004/herdr-timekit
+```
+
+See the README for the requirements.
+
+## 2. Sidebar setup
 
 herdr only draws custom tokens that appear in your sidebar layout. Add the timekit rows to `[ui.sidebar.agents]` in herdr's `config.toml`, then run `herdr server reload-config`:
 
@@ -75,3 +83,11 @@ python -X utf8 src/timekit.py <command>
 ## Language
 
 The panel, box labels, and messages follow the language setting. See [Configuration: Language](configuration.md#language).
+
+## Documentation
+
+- [Usage (한국어)](usage.ko.md)
+- [Configuration](configuration.md): every `config.json` key
+- [Troubleshooting](troubleshooting.md): common problems and checks
+- [Development](development.md): project layout and how to add things
+- [TODO](todo.md): improvement list (Korean)

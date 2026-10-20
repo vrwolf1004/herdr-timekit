@@ -21,6 +21,7 @@
 import argparse
 import json
 import os
+import re
 import select
 import sys
 import time
@@ -116,8 +117,18 @@ def load_config(config_dir):
 
 
 def display_width(text):
-    """터미널에서 차지하는 칸 수. 한글과 전각 문자는 두 칸으로 센다."""
+    """터미널에서 차지하는 칸 수. 한글과 전각 문자는 두 칸으로 세고, 색 코드는 세지 않는다."""
+    text = re.sub(r"\x1b\[[0-9;]*m", "", text)
     return sum(2 if unicodedata.east_asian_width(char) in ("W", "F") else 1 for char in text)
+
+
+def dim_keys(text):
+    """줄마다 첫 [ 부터 끝까지, 단축키 안내를 회색으로 한다."""
+    lines = []
+    for line in text.split("\n"):
+        index = line.find("[")
+        lines.append(line if index < 0 else line[:index] + "\x1b[2m" + line[index:] + "\x1b[0m")
+    return "\n".join(lines)
 
 
 PANEL_INNER = 46
@@ -437,11 +448,36 @@ def pick_pane(panes, stored_pane, agent_panes):
     다른 플러그인 블록이나 herdr-sidebar pane 은 건드리지 않는다. 빈 pane 이 없으면 None.
     """
     ids = [p["pane_id"] for p in panes]
-    if stored_pane in ids:
+    if stored_pane in ids and stored_pane not in agent_panes:
         return stored_pane
     free = [p["pane_id"] for p in panes
             if not p.get("label") and not p.get("tokens") and p["pane_id"] not in agent_panes]
     return free[0] if free else None
+
+
+def grid_split(anchor, cwd):
+    """dock 을 2x2 로 나눈다. 자리는 왼쪽 위, 오른쪽 위, 왼쪽 아래, 오른쪽 아래 순서이고, 빈 자리는 빈 채로 둔다.
+    anchor 로 갈 수 없는 자리는 건너뛴다. 나눌 자리가 없으면 anchor 아래로 나눈다."""
+    layout = herdr_api.cli("pane", "layout", "--pane", anchor)["layout"]
+    area = layout["area"]
+    corners = {}
+    for pane in layout["panes"]:
+        rect = pane["rect"]
+        corners[(0 if rect["x"] <= area["x"] else 1, 0 if rect["y"] <= area["y"] else 1)] = pane["pane_id"]
+    top_left, top_right = corners.get((0, 0)), corners.get((1, 0))
+    bottom_left, bottom_right = corners.get((0, 1)), corners.get((1, 1))
+    if top_left and not top_right:
+        target, direction = top_left, "right"
+    elif top_left and not bottom_left:
+        target, direction = top_left, "down"
+    elif top_right and not bottom_right:
+        target, direction = top_right, "down"
+    elif bottom_left and not bottom_right:
+        target, direction = bottom_left, "right"
+    else:
+        target, direction = anchor, "down"
+    split = herdr_api.cli("pane", "split", target, "--direction", direction, "--cwd", cwd)
+    return split["pane"]["pane_id"]
 
 
 def ensure_workspace(state):
@@ -461,8 +497,7 @@ def ensure_workspace(state):
         anchor = next((p["pane_id"] for p in panes if not is_sidebar(p)), None)
         if anchor is None:
             raise herdr_api.HerdrError(f"workspace {workspace_id} has no pane")
-        split = herdr_api.cli("pane", "split", anchor, "--direction", "down", "--cwd", state.directory)
-        pane_id = split["pane"]["pane_id"]
+        pane_id = grid_split(anchor, state.directory)
     state.write("pane.id", pane_id)
     return workspace_id, pane_id
 
@@ -814,7 +849,7 @@ class Host:
         counter_state = t("status.counting") if self.state.read_counter_state()["started_at"] is not None else t("status.stopped")
         lines = [
             "╭" + "─" * inner + "╮",
-            panel_row(center("🌸  herdr-timekit  🌸", inner - 1)),
+            panel_row(center("🐺  herdr-timekit  🌕", inner - 1)),
             "├" + "─" * inner + "┤",
             panel_row("🕒 " + t("section.time")),
             panel_row("  " + pad_to(t("row.now"), 10) + tokens["tk_now"]),
@@ -827,11 +862,9 @@ class Host:
             panel_row("🔢 " + t("section.counter")),
             panel_row("  " + pad_to(t("row.value"), 10) + pad_to(tokens["tk_counter"], 16) + counter_state),
             "├" + "─" * inner + "┤",
-            panel_row("  " + t("keys.timer")),
-            panel_row("  " + t("keys.preset")),
-            panel_row("  " + t("keys.counter")),
-            panel_row("  " + t("keys.world")),
-            panel_row("  " + t("keys.box")),
+            panel_row("  " + dim_keys(t("keys.row1"))),
+            panel_row("  " + dim_keys(t("keys.row2"))),
+            panel_row("  " + dim_keys(t("keys.row3"))),
             "╰" + "─" * inner + "╯",
         ]
         if self.mark:
@@ -843,7 +876,9 @@ class Host:
             lines.append(f"  {self.notice}")
         if self.config_error:
             lines += ["", f"  {t('config.error')}: {self.config_error}"]
-        sys.stdout.write("\x1b[H\x1b[2J" + "\n".join(lines) + "\n")
+        # 같은 자리에 덮어쓴다. 화면을 지우면 터미널 스크롤백에 이전 프레임이 쌓인다.
+        painted = "\n".join(line + "\x1b[K" for line in lines)
+        sys.stdout.write("\x1b[H" + painted + "\x1b[J")
         sys.stdout.flush()
 
     def run(self):

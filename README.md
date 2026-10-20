@@ -10,7 +10,7 @@ Detail panel (opened in the timekit pane):
 
 ```
 ╭──────────────────────────────────────────────╮
-│             🌸  herdr-timekit  🌸            │
+│             🐺  herdr-timekit  🌕            │
 ├──────────────────────────────────────────────┤
 │ 🕒 TIME                                      │
 │   NOW       16:02                            │
@@ -26,11 +26,9 @@ Detail panel (opened in the timekit pane):
 │ 🔢 COUNTER                                   │
 │   VALUE     0               stopped          │
 ├──────────────────────────────────────────────┤
-│   [t] start/pause   [r] reset                │
-│   [1-6] preset  10s 30s 1m 20m 30m 1h        │
-│   [c] start/pause   [0] reset                │
-│   [w] add zone   [x] remove last             │
-│   [b] change clock design                    │
+│   [t] start/pause  [r] reset                 │
+│   [c] start/pause  [0] reset                 │
+│   [1-6] preset [w] add [x] remove [b] design  │
 ╰──────────────────────────────────────────────╯
 ```
 
@@ -55,7 +53,7 @@ herdr plugin install vrwolf1004/herdr-timekit
 
 ## Quick start
 
-1. Install the plugin and add the sidebar rows (see [Usage](docs/usage.md#sidebar-setup)).
+1. Install the plugin and add the sidebar rows (see [Usage](docs/usage.md#2-sidebar-setup)).
 2. Click the timekit pane and press `t` to start the timer, or `c` to start the counter.
 3. Press `w` to add a world clock by city name, for example `Seoul`.
 
@@ -69,6 +67,7 @@ herdr plugin install vrwolf1004/herdr-timekit
 
 - [Usage](docs/usage.md): sidebar setup, keys, commands, world clocks
 - [Configuration](docs/configuration.md): every `config.json` key
+- [Troubleshooting](docs/troubleshooting.md): common problems and checks
 - [Development](docs/development.md): project layout and how to add things
 
 ## Support the project

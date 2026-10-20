@@ -19,7 +19,7 @@
 
 ## 문제 해결 문서
 
-- [ ] `docs/troubleshooting.md` 추가
+- [x] `docs/troubleshooting.md` 추가
   - 사이드바에 시계가 안 나옴 (`config.toml` 줄 누락, `server reload-config` 필요)
   - 세계 시간이 안 나옴 (Windows에서 `tzdata` 미설치)
   - 키를 눌러도 반응 없음 (pane 포커스 필요, 숫자 키가 herdr에 가로채일 가능성)

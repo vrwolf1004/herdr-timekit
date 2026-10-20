@@ -12,8 +12,6 @@
   "status.done": "fertig",
   "status.counting": "zählt",
   "status.stopped": "gestoppt",
-  "keys.timer": "[t] Start/Pause  [r] Zurücksetzen",
-  "keys.counter": "[c] Start/Pause  [0] Reset",
   "holiday.label": "Feiertag",
   "config.error": "Konfigurationsfehler",
   "box.am": "AM",
@@ -25,15 +23,15 @@
   "cli.unknown_zone": "unbekannte Zeitzone '{zone}'",
   "cli.already": "{zone} ist schon in der Liste",
   "cli.not_in_list": "{zone} ist nicht in der Liste",
-  "keys.world": "[w] hinzufügen   [x] entfernen",
   "world.prompt": "Zeitzone: {value}",
   "world.added": "{zone} hinzugefügt",
   "world.removed": "{zone} entfernt",
   "world.empty": "keine Zeitzone zum Entfernen",
   "exclusive.counter_running": "Zähler läuft, bitte zuerst stoppen",
   "exclusive.timer_running": "Timer läuft, bitte zuerst pausieren",
-  "keys.box": "[b] Uhr-Design ändern",
   "box.changed": "Uhr-Design: {style}",
   "box.counter": "ZÄHLER",
-  "keys.preset": "[1-6] Voreinstellung  10s 30s 1m 20m 30m 1h"
+  "keys.row1": "[t] Start/Pause  [r] Reset",
+  "keys.row2": "[c] Start/Pause  [0] Reset",
+  "keys.row3": "[1-6] Voreinst.  [w] +  [x] −  [b] Design"
 }

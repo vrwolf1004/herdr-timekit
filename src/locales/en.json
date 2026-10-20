@@ -12,8 +12,6 @@
   "status.done": "done",
   "status.counting": "counting",
   "status.stopped": "stopped",
-  "keys.timer": "[t] start/pause   [r] reset",
-  "keys.counter": "[c] start/pause   [0] reset",
   "holiday.label": "holiday",
   "config.error": "config error",
   "box.am": "AM",
@@ -25,15 +23,15 @@
   "cli.unknown_zone": "unknown time zone '{zone}'",
   "cli.already": "{zone} is already in the list",
   "cli.not_in_list": "{zone} is not in the list",
-  "keys.world": "[w] add zone   [x] remove last",
   "world.prompt": "Time zone: {value}",
   "world.added": "added {zone}",
   "world.removed": "removed {zone}",
   "world.empty": "no time zone to remove",
   "exclusive.counter_running": "counter is running, stop it first",
   "exclusive.timer_running": "timer is running, pause it first",
-  "keys.box": "[b] change clock design",
   "box.changed": "clock design: {style}",
   "box.counter": "COUNTER",
-  "keys.preset": "[1-6] preset  10s 30s 1m 20m 30m 1h"
+  "keys.row1": "[t] start/pause  [r] reset",
+  "keys.row2": "[c] start/pause  [0] reset",
+  "keys.row3": "[1-6] preset [w] add [x] remove [b] design"
 }

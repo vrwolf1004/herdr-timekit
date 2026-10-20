@@ -12,8 +12,6 @@
   "status.done": "終了",
   "status.counting": "カウント中",
   "status.stopped": "停止",
-  "keys.timer": "[t] 開始/一時停止   [r] リセット",
-  "keys.counter": "[c] 開始/停止  [0] リセット",
   "holiday.label": "祝日",
   "config.error": "設定エラー",
   "box.am": "午前",
@@ -25,15 +23,15 @@
   "cli.unknown_zone": "不明な時間帯 '{zone}'",
   "cli.already": "{zone} は既にリストにあります",
   "cli.not_in_list": "{zone} はリストにありません",
-  "keys.world": "[w] 時間帯を追加   [x] 最後を削除",
   "world.prompt": "時間帯: {value}",
   "world.added": "{zone} を追加しました",
   "world.removed": "{zone} を削除しました",
   "world.empty": "削除する時間帯がありません",
   "exclusive.counter_running": "カウンターが実行中です。先に停止してください",
   "exclusive.timer_running": "タイマーが実行中です。先に一時停止してください",
-  "keys.box": "[b] 時計のデザイン変更",
   "box.changed": "時計のデザイン: {style}",
   "box.counter": "カウンター",
-  "keys.preset": "[1-6] 設定 10秒 30秒 1分 20分 30分 1時間"
+  "keys.row1": "[t] 開始/停止  [r] リセット",
+  "keys.row2": "[c] 開始/停止  [0] リセット",
+  "keys.row3": "[1-6] 設定 [w] 追加 [x] 削除 [b] デザイン"
 }

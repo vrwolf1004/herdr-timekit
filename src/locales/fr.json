@@ -12,8 +12,6 @@
   "status.done": "terminé",
   "status.counting": "comptage",
   "status.stopped": "arrêté",
-  "keys.timer": "[t] lancer/pause  [r] réinit.",
-  "keys.counter": "[c] lancer/pause  [0] réinit.",
   "holiday.label": "jour férié",
   "config.error": "erreur de config",
   "box.am": "AM",
@@ -25,15 +23,15 @@
   "cli.unknown_zone": "fuseau inconnu '{zone}'",
   "cli.already": "{zone} est déjà dans la liste",
   "cli.not_in_list": "{zone} n'est pas dans la liste",
-  "keys.world": "[w] ajouter   [x] supprimer dernier",
   "world.prompt": "Fuseau : {value}",
   "world.added": "{zone} ajouté",
   "world.removed": "{zone} supprimé",
   "world.empty": "aucun fuseau à supprimer",
   "exclusive.counter_running": "le compteur tourne, arrêtez-le d'abord",
   "exclusive.timer_running": "la minuterie tourne, mettez-la en pause d'abord",
-  "keys.box": "[b] changer le design",
   "box.changed": "design de l'horloge : {style}",
   "box.counter": "COMPTEUR",
-  "keys.preset": "[1-6] préréglage  10s 30s 1m 20m 30m 1h"
+  "keys.row1": "[t] lancer/pause  [r] réinit.",
+  "keys.row2": "[c] lancer/pause  [0] réinit.",
+  "keys.row3": "[1-6] préréglé  [w] ajouter  [x] suppr."
 }

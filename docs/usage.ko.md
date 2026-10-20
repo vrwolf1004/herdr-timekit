@@ -2,7 +2,15 @@
 
 [English](usage.md) | [**한국어**](usage.ko.md)
 
-## 사이드바 설정
+## 1. 설치
+
+```sh
+herdr plugin install vrwolf1004/herdr-timekit
+```
+
+요구 사항은 README를 보세요.
+
+## 2. 사이드바 설정
 
 herdr는 사이드바 레이아웃에 들어 있는 토큰만 그립니다. herdr의 `config.toml`에 있는 `[ui.sidebar.agents]`에 timekit 줄을 넣고 `herdr server reload-config`를 실행하세요.
 
@@ -75,3 +83,11 @@ python -X utf8 src/timekit.py <명령>
 ## 언어
 
 패널, 박스 글자, 메시지는 언어 설정을 따릅니다. [설정: 언어](configuration.md#language)를 보세요(영문).
+
+## 문서
+
+- [Usage (English)](usage.md)
+- [설정](configuration.md): `config.json`의 모든 키 (영문)
+- [문제 해결](troubleshooting.md): 증상별 확인 방법 (영문)
+- [개발](development.md): 프로젝트 구조와 추가 방법 (영문)
+- [할 일](todo.md): 개선 목록
