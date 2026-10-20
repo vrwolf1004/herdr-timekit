@@ -65,7 +65,7 @@ herdr plugin install vrwolf1004/herdr-timekit
 
 ## Documentation
 
-- [Usage](docs/usage.md): sidebar setup, keys, commands, world clocks
+- [Usage](docs/usage.md): sidebar setup, keys, commands, world clocks (Korean: [usage.ko.md](docs/usage.ko.md))
 - [Configuration](docs/configuration.md): every `config.json` key
 - [Troubleshooting](docs/troubleshooting.md): common problems and checks
 - [Development](docs/development.md): project layout and how to add things
