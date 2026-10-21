@@ -5,7 +5,7 @@ Common problems and checks. For settings, see [Configuration](configuration.md).
 | Symptom | Check |
 |---------|-------|
 | The clock does not show in the sidebar | The `$tk_*` rows are missing from herdr's `config.toml`. Add them as in [Usage: Sidebar setup](usage.md#2-sidebar-setup), then run `herdr server reload-config`. |
-| World clocks do not show | The zone name is wrong, or the system has no time zone data for it. The plugin skips zones it cannot load, so check the name with `world-list` and `world-add` (for example `Asia/Seoul`). On Windows, a zone that never appears can mean the system time zone database is missing. This has not been checked on a clean Windows install yet. |
+| World clocks do not show | The zone name is wrong, or the system has no time zone data for it. The plugin skips zones it cannot load, so check the name with `world-list` and `world-add` (for example `Asia/Seoul`). On Windows, install the `tzdata` package with `python -m pip install tzdata` if IANA zones are unavailable. |
 | Keys do nothing in the panel | The panel must have focus. Number keys may be taken by herdr when another pane is focused, so focus the panel pane first. |
 | The language is not what you expect | The order is `HERDR_TIMEKIT_LANG`, then `"lang"` in `config.json`, then the OS language, then English. See [Configuration: Language](configuration.md#language). |
 | The block seems stuck | Run `ensure` to restart the host. To stop everything, run `stop` first, then `ensure`. See [Usage: Commands](usage.md#commands). |

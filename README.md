@@ -5,6 +5,10 @@
 UI languages: English · Korean · Russian · French · Spanish · German · Japanese
 
 Show the current time, world clocks, a timer, and a counter in one block at the bottom of herdr's sidebar.
+The block starts automatically when herdr starts or a workspace is created. It
+uses a pane in the shared `herdr-dock` workspace; the `stop` action hides it.
+Public holidays are fetched from Nager.Date and cached locally; for Korea,
+the bundled calendar supplements the fetched data.
 
 ## Dashboard design
 

@@ -21,7 +21,8 @@ The plugin looks for the file in this order:
   "default_timer_seconds": 1500,
   "now_style": "hm",
   "box_style": "double_star",
-  "holiday_theme": true
+  "holiday_theme": true,
+  "holiday_country": "KR"
 }
 ```
 
@@ -32,9 +33,10 @@ The plugin looks for the file in this order:
 | `lang`                  | string          | OS language   | Language of the panel, box labels, and messages (see below) |
 | `timezones`             | array of string | `[]`          | Time zones shown as world clocks (see [Usage](usage.md#world-clocks)) |
 | `default_timer_seconds` | integer         | `1500`        | Length of a new timer, in seconds                       |
-| `now_style`             | string          | `"hm"`        | Format of the time in the sidebar and panel (see below) |
+| `now_style`             | string          | `"hm"`        | Format of the current-time token in the sidebar (see below) |
 | `box_style`             | string          | `"double_star"` | Frame of the sidebar clock box (see below)            |
 | `holiday_theme`         | boolean         | `true`        | Show a holiday emoji and name on public holidays        |
+| `holiday_country`       | string          | Based on UI language | Country code used to look up public holidays; see below |
 
 ## Clock box styles (`box_style`)
 
@@ -78,8 +80,9 @@ Seconds are never shown. An unknown value falls back to `hm`.
 On a holiday, the sidebar time gets the holiday's emoji in front, and the panel shows the holiday name.
 
 - `holiday_theme` turns this on or off.
-- The holiday list is `holidays.json` in the plugin folder. Each entry has `date` (`YYYY-MM-DD`), `name` (Korean), `name_en` (English), and `emoji`. Edit it to change emoji or names, or to add holidays.
-- The file covers 2026 only. Lunar holidays (설날, 부처님오신날, 추석) change every year, so add the next year's dates before then.
+- The plugin loads public holidays from the Nager.Date API and caches a five-year window in its state directory. It refreshes the window when the country changes or the current year reaches its last year. If the request fails, it keeps the previous cache; when no cache is available, it uses the bundled `holidays.json`. Bundled entries apply to Korea and take precedence over fetched entries for matching dates.
+- `holiday_country` overrides the country inferred from the UI language (`ko` → `KR`, `ja` → `JP`, `ru` → `RU`, `fr` → `FR`, `de` → `DE`, `es` → `ES`, `en` → `US`; other languages default to `US`). Use a country code such as `"KR"` or `"US"`.
+- The bundled file can be edited to change its `date` (`YYYY-MM-DD`), `name`, `name_en`, and `emoji` entries. It supplements the online calendar for Korea; lunar holiday dates are supplied by the fetched calendar for other years.
 
 ## Language
 

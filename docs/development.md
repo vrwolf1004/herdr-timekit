@@ -50,7 +50,7 @@ Add an entry to `BOX_STYLES` in `src/timekit.py` with `corners` (top-left, top-r
 
 ## Holidays
 
-Edit `holidays.json`. Dates are `YYYY-MM-DD`. Keep `name` (Korean) and `name_en` (English) filled in. Lunar holidays need a new entry each year.
+Public holidays are fetched in five-year windows from Nager.Date and cached in the plugin state directory. The bundled `holidays.json` supplements the fetched calendar for Korea; matching bundled dates take precedence. Edit bundled entries with `date` (`YYYY-MM-DD`), `name` (Korean), `name_en` (English), and `emoji`. See [Configuration](configuration.md#holiday-theme) for country selection and fallback behavior.
 
 ## Conventions
 
