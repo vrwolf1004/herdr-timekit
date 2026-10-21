@@ -2,48 +2,13 @@
 
 [**English**](README.md) | [한국어](README.ko.md)
 
-A herdr plugin that shows the time, world clocks, a timer, and a counter in one block at the bottom of the sidebar, next to your AI coding agents.
+🌐 UI languages: 🇺🇸 English (en) · 🇰🇷 한국어 (ko) · 🇷🇺 Русский (ru) · 🇫🇷 Français (fr) · 🇪🇸 Español (es) · 🇩🇪 Deutsch (de) · 🇯🇵 日本語 (ja)
+
+Show the current time, world clocks, a timer, and a counter in one block at the bottom of herdr's sidebar.
 
 ## Dashboard design
 
-Detail panel (opened in the timekit pane):
-
-```
-╭──────────────────────────────────────────────╮
-│             🐺  herdr-timekit  🌕            │
-├──────────────────────────────────────────────┤
-│ 🕒 TIME                                      │
-│   NOW       16:02                            │
-│ 🌐 WORLD    Seoul          17:23 KST         │
-│             New York       04:23 EDT         │
-│             Tokyo          17:23 JST         │
-│             Paris          10:23 CEST        │
-├──────────────────────────────────────────────┤
-│ ⏳ TIMER                                     │
-│   VALUE     25:00           ready            │
-│   PROGRESS  ████████████████                 │
-├──────────────────────────────────────────────┤
-│ 🔢 COUNTER                                   │
-│   VALUE     0               stopped          │
-├──────────────────────────────────────────────┤
-│   [t] start/pause  [r] reset                 │
-│   [c] start/pause  [0] reset                 │
-│   [1-6] preset [w] add [x] remove [b] design  │
-╰──────────────────────────────────────────────╯
-```
-
-Sidebar block (watch-style box, `box_style: emoji_tulip`, one of ten styles):
-
-```
-╔═════════════╗
-║ 🌷 🌷 🌷 🌷 ║
-║   PM 4:02   ║
-║    10/19    ║
-║ 🌷 🌷 🌷 🌷 ║
-╚═════════════╝
-```
-
-The box shows the time and date. While the timer runs, it shows the timer value. While the counter runs, it shows the counter value. When the timer ends, the text blinks between `* done *` and `  done  `. Press `b` in the panel to change the design.
+The sidebar block shows the time and date, or the running timer or counter. The timekit pane displays details and lets you change the block's design.
 
 ## Installation
 
@@ -51,24 +16,30 @@ The box shows the time and date. While the timer runs, it shows the timer value.
 herdr plugin install vrwolf1004/herdr-timekit
 ```
 
-## Quick start
+## Actions
 
-1. Install the plugin and add the sidebar rows (see [Usage](docs/usage.md#2-sidebar-setup)).
-2. Click the timekit pane and press `t` to start the timer, or `c` to start the counter.
-3. Press `w` to add a world clock by city name, for example `Seoul`.
+| Action | What it does |
+| --- | --- |
+| `start` / `stop` | Show or hide the time block |
+| `counter-reset` | Reset the counter |
+| `timer-start` / `timer-pause` / `timer-reset` | Control or reset the timer |
+| `world-list` / `world-clear` | List or clear world clocks |
+
+On Windows, append `-windows` to each action ID. See the [usage guide](docs/usage.md) for sidebar setup, pane controls, presets, and world clocks.
 
 ## Requirements
 
 - herdr 0.9.0 or later
 - Windows, Linux, or macOS
-- Python 3.9 or later (on Windows, also `python -m pip install tzdata`)
+- Python 3.9 or later; on Windows, also run `python -m pip install tzdata`
 
 ## Documentation
 
-- [Usage](docs/usage.md): sidebar setup, keys, commands, world clocks (Korean: [usage.ko.md](docs/usage.ko.md))
-- [Configuration](docs/configuration.md): every `config.json` key
-- [Troubleshooting](docs/troubleshooting.md): common problems and checks
-- [Development](docs/development.md): project layout and how to add things
+- [Usage (English)](docs/usage.md)
+- [사용법 (한국어)](docs/usage.ko.md)
+- [Configuration](docs/configuration.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Development](docs/development.md)
 
 ## Support the project
 
