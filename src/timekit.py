@@ -24,6 +24,7 @@ import os
 import re
 import select
 import sys
+import threading
 import time
 import unicodedata
 from datetime import datetime
@@ -31,6 +32,7 @@ import zoneinfo
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import herdr_api
+import holiday_source
 import i18n
 from i18n import t
 
@@ -215,15 +217,37 @@ def watch_lines(moment, mark, box_style=DEFAULT_BOX_STYLE, timer_label=None, cou
     ]
 
 
-def load_holidays():
-    """holidays.json 을 읽어 날짜(YYYY-MM-DD) → 휴일 항목 사전을 만든다. 파일이 없거나 고장나면 빈 사전이다."""
-    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "holidays.json")
+def valid_holiday(entry):
+    """날짜는 YYYY-MM-DD 로 실제 있는 날이고, emoji 와 name 은 문자열이어야 한다. 아니면 이유를 돌려준다."""
+    if not isinstance(entry, dict):
+        return "not an object"
+    try:
+        datetime.strptime(str(entry.get("date")), "%Y-%m-%d")
+    except ValueError:
+        return f"bad date {entry.get('date')!r}"
+    if not isinstance(entry.get("emoji"), str) or not isinstance(entry.get("name"), str):
+        return "emoji and name must be strings"
+    return None
+
+
+def load_holidays(path=None):
+    """holidays.json 을 읽어 날짜(YYYY-MM-DD) → 휴일 항목 사전을 만든다. 파일이 없거나 고장나면 빈 사전이다.
+    형식이 틀린 항목은 건너뛰고 stderr 에 이유를 한 줄씩 남긴다."""
+    if path is None:
+        path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "holidays.json")
     try:
         with open(path, encoding="utf-8") as file:
             entries = json.load(file).get("holidays", [])
     except (OSError, json.JSONDecodeError, AttributeError):
         return {}
-    return {entry["date"]: entry for entry in entries if isinstance(entry, dict) and "date" in entry}
+    holidays = {}
+    for entry in entries if isinstance(entries, list) else []:
+        problem = valid_holiday(entry)
+        if problem:
+            print(f"holidays.json: skipped entry ({problem})", file=sys.stderr)
+            continue
+        holidays[entry["date"]] = entry
+    return holidays
 
 
 def holiday_mark(moment, config, holidays):
@@ -275,8 +299,12 @@ class State:
             return None
 
     def write(self, name, value):
-        with open(self.path(name), "w", encoding="utf-8") as file:
+        # 임시 파일에 쓰고 바꿔 끼운다. 중간에 멈춰도 읽는 쪽은 예전 값이나 새 값 중 하나만 본다.
+        target = self.path(name)
+        temp = target + ".tmp"
+        with open(temp, "w", encoding="utf-8") as file:
             file.write(value)
+        os.replace(temp, target)
 
     def remove(self, name):
         try:
@@ -639,7 +667,8 @@ class Host:
         self.sidebar_sent = {}  # 사이드바 pane id → 마지막으로 숨기기 키를 보낸 시각
         self.socket_failures = 0
         self.config_error = None
-        self.holidays = load_holidays()
+        self.holidays = load_holidays()  # 번들 파일을 먼저 쓰고, 연도가 바뀌면 백그라운드에서 받아 바꾼다
+        self.holiday_key = None
         self.input_mode = None
         self.input_text = ""
         self.notice = ""
@@ -660,6 +689,20 @@ class Host:
             self.config_error = str(error)
         return config
 
+    def refresh_holidays(self, moment, config):
+        """국가와 연도가 바뀌었을 때만 휴일을 다시 준비한다. 받는 동안에도 화면은 예전 목록으로 그린다."""
+        country = config.get("holiday_country") or holiday_source.country_for_language(i18n.language())
+        key = (country, moment.year)
+        if key == self.holiday_key:
+            return
+        self.holiday_key = key
+        bundled = load_holidays()
+
+        def work():
+            self.holidays = holiday_source.holidays_for(self.state.directory, country, moment.year, bundled=bundled)
+
+        threading.Thread(target=work, daemon=True).start()
+
     def tokens(self, now, config):
         default_seconds = timer_default_seconds(config)
         timer = self.state.read_timer(default_seconds)
@@ -669,6 +712,7 @@ class Host:
         self.timer_label = timer_text(timer, now)
         self.timer_progress = timer_bar(timer, now, default_seconds)
         moment = datetime.fromtimestamp(now)
+        self.refresh_holidays(moment, config)
         mark = holiday_mark(moment, config, self.holidays)
         self.mark = mark
         current = now_text(moment, config)
@@ -685,11 +729,11 @@ class Host:
             # 끝난 타이머는 1초마다 * 완료 * 와 완료 모양이 번갈아 나와 번쩍인다. 두 모양의 폭은 같다.
             word = t("status.done")
             timer_label = ("* " + word + " *") if int(now) % 2 == 0 else ("  " + word + "  ")
-        counter_label = f"# {self.counter_value_now}" if self.counter_active else None
-        box = watch_lines(moment, mark, config.get("box_style", DEFAULT_BOX_STYLE), timer_label, counter_label)
         counter = self.state.read_counter_state()
         self.counter_active = counter["started_at"] is not None
         self.counter_value_now = counter_value(counter, now)
+        counter_label = f"# {self.counter_value_now}" if self.counter_active else None
+        box = watch_lines(moment, mark, config.get("box_style", DEFAULT_BOX_STYLE), timer_label, counter_label)
         self.world_lines = world_lines(config.get("timezones", []))
         for index, line in enumerate(box, 1):
             tokens[f"tk_box{index}"] = line
