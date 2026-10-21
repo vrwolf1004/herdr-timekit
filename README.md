@@ -8,7 +8,38 @@ Show the current time, world clocks, a timer, and a counter in one block at the 
 
 ## Dashboard design
 
-The sidebar block shows the time and date, or the running timer or counter. The timekit pane displays details and lets you change the block's design.
+Agents sidebar:
+
+```text
+┌────── TIME ──────┐
+│     13:45:08     │
+│   Sat, Mar 08    │
+│  Seoul  13:45    │
+│  Tokyo  13:45    │
+└──────────────────┘
+```
+
+Timekit pane:
+
+```text
+╭──────────────────────────────────────────────╮
+│               🐺  herdr-timekit  🌕          │
+├──────────────────────────────────────────────┤
+│  TIME                                         │
+│  13:45:08  Saturday, March 8                  │
+│                                              │
+│  WORLD CLOCKS                                │
+│  Seoul       13:45   Asia/Seoul              │
+│  New York    23:45   America/New_York        │
+├──────────────────────────────────────────────┤
+│  TIMER                 COUNTER               │
+│  20:00                 1,234                 │
+│  [t] start/pause       [c] start/pause       │
+│  [r] reset             [0] reset             │
+├──────────────────────────────────────────────┤
+│  [1-6] presets  [w] add clock  [b] style     │
+╰──────────────────────────────────────────────╯
+```
 
 ## Installation
 
