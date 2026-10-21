@@ -583,6 +583,7 @@ def cmd_stop(args):
         if others:
             if pane_id:
                 herdr_api.cli("pane", "close", pane_id, check=False)
+            ensure_intro(workspace_id, None, state.directory)  # 블록이 빠져 생긴 빈 칸에 소개를 띄운다
         else:
             herdr_api.cli("workspace", "close", workspace_id, check=False)
     for name in ("workspace.id", "pane.id", "heartbeat"):
