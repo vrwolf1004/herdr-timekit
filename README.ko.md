@@ -6,7 +6,8 @@
 
 herdr 사이드바 맨 아래 블록에 현재 시각, 세계 시간, 타이머, 카운터를 모아 보여 줍니다.
 herdr 시작 시와 새 workspace 생성 시 블록이 자동으로 시작됩니다. 공유 `herdr-dock` workspace의 pane을 사용하며 `stop` 액션으로 숨길 수 있습니다.
-공휴일은 Nager.Date에서 받아 로컬에 캐시합니다. 국가를 한국(`KR`)으로 설정하면 함께 제공되는 한국 공휴일 달력도 적용됩니다.
+공휴일은 Nager.Date에서 받아 5년치로 로컬에 캐시합니다. 캐시의 다섯 번째 연도에 이르거나 `holiday_country`가 바뀌면 새로 받습니다. 갱신에 실패하면 오류를 `host.log`에 기록하고 기존 캐시를 유지합니다. 한국(`KR`)에서는 함께 제공되는 한국 공휴일 달력도 적용됩니다.
+카운터는 실행 중 초마다 증가하며 사이드바와 시계 상자에 같은 현재 값을 표시합니다.
 
 ## 대시보드 디자인
 
@@ -71,6 +72,7 @@ Windows에서는 각 액션 ID 뒤에 `-windows`를 붙입니다. 사이드바 �
 - [사용법 (한국어)](docs/usage.ko.md)
 - [Usage (English)](docs/usage.md)
 - [설정](docs/configuration.md)
+- [구조](docs/architecture.md)
 - [문제 해결](docs/troubleshooting.md)
 - [개발](docs/development.md)
 

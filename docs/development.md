@@ -50,7 +50,9 @@ Add an entry to `BOX_STYLES` in `src/timekit.py` with `corners` (top-left, top-r
 
 ## Holidays
 
-Public holidays are fetched in five-year windows from Nager.Date and cached in the plugin state directory. The bundled `holidays.json` supplements the fetched calendar for Korea; matching bundled dates take precedence. Edit bundled entries with `date` (`YYYY-MM-DD`), `name` (Korean), `name_en` (English), and `emoji`. See [Configuration](configuration.md#holiday-theme) for country selection and fallback behavior.
+Public holidays are fetched in five-year windows from Nager.Date and cached in the plugin state directory. The cache records the first year; it is refreshed if the country changes or the current year is four years after that start year (the fifth year represented in the cache). A failed fetch leaves the previous cache in place and is logged to `host.log` in the state directory. The bundled `holidays.json` supplements the fetched calendar for Korea; matching bundled dates take precedence. Edit bundled entries with `date` (`YYYY-MM-DD`), `name` (Korean), `name_en` (English), and `emoji`. See [Configuration](configuration.md#holiday-theme) for country selection and fallback behavior.
+
+The host calculates the counter's displayed value from the current tick before rendering the sidebar tokens and clock box. When running, it advances once per second; the clock box shows that same tick's value.
 
 ## Conventions
 

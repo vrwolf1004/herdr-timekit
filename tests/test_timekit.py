@@ -17,6 +17,21 @@ os.environ.setdefault("HERDR_TIMEKIT_LANG", "en")
 import timekit  # noqa: E402
 
 
+class PaneAliveTest(unittest.TestCase):
+    def test_missing_pane_is_not_alive(self):
+        from unittest import mock
+        with mock.patch.object(timekit.herdr_api, "cli", return_value=None):
+            self.assertFalse(timekit.pane_alive("wN:p1"))
+
+    def test_existing_pane_is_alive(self):
+        from unittest import mock
+        with mock.patch.object(timekit.herdr_api, "cli", return_value={"pane": {"pane_id": "wN:p1"}}):
+            self.assertTrue(timekit.pane_alive("wN:p1"))
+
+    def test_no_pane_id_is_not_alive(self):
+        self.assertFalse(timekit.pane_alive(None))
+
+
 class CounterTest(unittest.TestCase):
     def test_stopped_counter_keeps_its_value(self):
         self.assertEqual(timekit.counter_value({"value": 7, "started_at": None}, 100.0), 7)

@@ -100,12 +100,15 @@ def save_cache(path, data):
     os.replace(temp, path)
 
 
-def holidays_for(state_dir, country, now_year, bundled=None, fetch=fetch_year):
-    """화면에 쓸 휴일 사전. 필요하면 캐시를 새로 받고, 번들 항목(KR 만)을 우선해 합친다."""
+def holidays_for(state_dir, country, now_year, bundled=None, fetch=fetch_year, log=None):
+    """화면에 쓸 휴일 사전. 필요하면 캐시를 새로 받고, 번들 항목(KR 만)을 우선해 합친다.
+    받지 못하면 log(메시지) 를 부른다 (예전 캐시나 번들 목록을 대신 쓴다)."""
     path = os.path.join(state_dir, CACHE_FILE)
     cache = load_cache(path)
     if needs_refresh(cache, country, now_year):
         fresh = refresh(country, now_year, fetch)
+        if fresh is None and log is not None:
+            log(f"holidays: {country} {now_year} refresh failed; using the previous list")
         if fresh is not None:
             try:
                 save_cache(path, fresh)

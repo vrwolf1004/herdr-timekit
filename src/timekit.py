@@ -578,9 +578,16 @@ def host_command(state_dir, config_dir, pane_id):
             "--config", config_dir, "--pane", pane_id]
 
 
+def pane_alive(pane_id):
+    """pane 이 아직 herdr 에 있는지. 닫힌 pane 의 heartbeat 가 몇 초 남아 있어도 블록은 다시 띄워야 한다."""
+    if not pane_id:
+        return False
+    return herdr_api.cli("pane", "get", pane_id, check=False) is not None
+
+
 def cmd_ensure(args):
     state = State(args.state)
-    if state.host_alive():
+    if state.host_alive() and pane_alive(state.read("pane.id")):
         return 0
     # workspace 를 만들면 workspace.created hook 이 곧바로 ensure 를 한 번 더 부른다.
     # host 가 첫 heartbeat 를 쓰기 전이라 두 번째 호출이 같은 pane 에 명령을 또 입력하지 않도록 막는다.
@@ -698,8 +705,13 @@ class Host:
         self.holiday_key = key
         bundled = load_holidays()
 
+        def log(message):
+            with open(os.path.join(self.state.directory, "host.log"), "a", encoding="utf-8") as file:
+                file.write(f"{datetime.now():%Y-%m-%d %H:%M:%S} {message}\n")
+
         def work():
-            self.holidays = holiday_source.holidays_for(self.state.directory, country, moment.year, bundled=bundled)
+            self.holidays = holiday_source.holidays_for(self.state.directory, country, moment.year,
+                                                        bundled=bundled, log=log)
 
         threading.Thread(target=work, daemon=True).start()
 

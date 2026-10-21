@@ -125,5 +125,14 @@ class HolidaysForTest(unittest.TestCase):
         self.assertNotIn("2099-05-05", us)
 
 
+class FailureLogTest(unittest.TestCase):
+    def test_failed_refresh_is_logged(self):
+        messages = []
+        with tempfile.TemporaryDirectory() as directory:
+            hs.holidays_for(directory, "KR", 2026, fetch=lambda y, c: None, log=messages.append)
+        self.assertEqual(len(messages), 1)
+        self.assertIn("refresh failed", messages[0])
+
+
 if __name__ == "__main__":
     unittest.main()

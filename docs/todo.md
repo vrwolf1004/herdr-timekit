@@ -58,3 +58,10 @@
 
 - [ ] herdr `config.toml` 백업 파일(`config.toml.bak-timekit-*`) 정리 여부 결정
 - [x] `src/__pycache__`가 `.gitignore`로 제외되는지 확인 (`git check-ignore`로 확인)
+
+## 실행 확인에서 찾은 개선점 (2026-10-21)
+
+- [x] **ensure 가 heartbeat 만 보고 일찍 끝남** (pane 존재 확인 추가. `PaneAliveTest`) (`cmd_ensure`): radio 와 같은 문제다. pane 존재 확인을 추가한다.
+- [x] **휴일 갱신 실패가 조용함** (실패하면 `host.log` 에 한 줄 남긴다. `FailureLogTest`): `holiday_source` 가 실패하면 예전 캐시만 쓰고 기록이 없다. host.log 에 한 줄 남긴다.
+- [ ] **연도 전환 확인 필요**: 5년째 갱신은 가짜 시계 테스트만 했다. 실제 연도가 바뀔 때 동작하는지 확인한다.
+- [ ] **2x2 배치 함수 중복**: `grid_split`, `ensure_intro` 가 feedbag·radio·simple-git·stockpulse 와 같다. 공용 규칙이 정해지면 맞춘다.

@@ -46,6 +46,8 @@ Click the timekit pane to focus it, then press:
 
 Korean keyboard input also works: `ㅅ` for `t`, `ㄱ` for `r`, `ㅈ` for `w`, `ㅊ` for `c`.
 
+The counter display updates from the current tick: while running, its value advances once per second in both the sidebar token and the clock box. Pausing preserves the current value.
+
 ## World clocks
 
 Add time zones from the panel with `w`, or from the command line:

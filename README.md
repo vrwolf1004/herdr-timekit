@@ -7,8 +7,13 @@ UI languages: English · Korean · Russian · French · Spanish · German · Jap
 Show the current time, world clocks, a timer, and a counter in one block at the bottom of herdr's sidebar.
 The block starts automatically when herdr starts or a workspace is created. It
 uses a pane in the shared `herdr-dock` workspace; the `stop` action hides it.
-Public holidays are fetched from Nager.Date and cached locally; for Korea,
-the bundled calendar supplements the fetched data.
+Public holidays are fetched from Nager.Date and cached locally in five-year
+windows. The cache refreshes when the current year reaches the fifth year of
+its window, or when `holiday_country` changes. Refresh failures are recorded
+in `host.log`; an existing cache is retained. For Korea, the bundled calendar
+supplements the fetched data.
+The running counter advances once per second, with the same current value in
+the sidebar and clock box.
 
 ## Dashboard design
 
@@ -73,6 +78,7 @@ On Windows, append `-windows` to each action ID. See the [usage guide](docs/usag
 - [Usage (English)](docs/usage.md)
 - [사용법 (한국어)](docs/usage.ko.md)
 - [Configuration](docs/configuration.md)
+- [Architecture](docs/architecture.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Development](docs/development.md)
 
