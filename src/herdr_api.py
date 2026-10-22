@@ -7,6 +7,7 @@ socket 은 Unix 에서는 Unix domain socket, Windows 에서는 같은 경로 �
 
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -131,3 +132,20 @@ def try_request(method, params):
         return True
     except (HerdrError, ValueError):
         return False
+
+
+def installed_plugin_path(plugin_id):
+    """herdr plugin list 에서 활성화된 local plugin 의 폴더. 없거나 비활성이거나 GitHub 설치본이면 None."""
+    try:
+        completed = subprocess.run(
+            [herdr_bin(), "plugin", "list"],
+            stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding="utf-8", errors="replace",
+        )
+    except OSError:
+        return None
+    pattern = re.compile(r"^- " + re.escape(plugin_id) + r" \(.*\) enabled \[local:(.+)\]$")
+    for line in completed.stdout.splitlines():
+        match = pattern.match(line.strip())
+        if match:
+            return match.group(1)
+    return None
