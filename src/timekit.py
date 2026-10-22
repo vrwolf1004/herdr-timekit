@@ -472,17 +472,75 @@ def is_sidebar(pane):
     return any(name.startswith(SIDEBAR_TOKEN_PREFIX) for name in (pane.get("tokens") or {}))
 
 
-def pick_pane(panes, stored_pane, agent_panes):
+DOCK_ORDER = ("herdr-simple-git", "herdr-timekit")  # 알파벳순. 앞선 plugin 이 자리를 잡는 동안 뒤 plugin 은 기다린다
+DOCK_WAIT_SECONDS = 5
+DOCK_MARKER_STALE_SECONDS = 10
+
+
+def dock_marker(folder, key):
+    return os.path.join(folder, f"{key}.dock")
+
+
+def write_dock_marker(folder, key, pane_id):
+    """plugins 폴더에 자리 표시를 남긴다. pane_id 가 비어 있으면 자리를 잡는 중이라는 뜻이다."""
+    with open(dock_marker(folder, key), "w", encoding="utf-8") as f:
+        f.write(pane_id or "")
+
+
+def remove_dock_marker(folder, key):
+    try:
+        os.remove(dock_marker(folder, key))
+    except OSError:
+        pass
+
+
+def dock_starting(folder, key):
+    path = dock_marker(folder, key)
+    try:
+        with open(path, encoding="utf-8") as f:
+            if f.read().strip():
+                return False
+        return time.time() - os.path.getmtime(path) < DOCK_MARKER_STALE_SECONDS
+    except OSError:
+        return False
+
+
+def wait_for_earlier(folder, own):
+    """알파벳상 앞선 dock plugin 이 자리를 잡는 중이면 잠깐 기다린다. 오래된 표시는 죽은 것으로 보고 무시한다."""
+    earlier = DOCK_ORDER[:DOCK_ORDER.index(own)]
+    deadline = time.time() + DOCK_WAIT_SECONDS
+    while any(dock_starting(folder, key) for key in earlier) and time.time() < deadline:
+        time.sleep(0.2)
+
+
+def claimed_dock_panes(folder, own):
+    """다른 dock plugin 이 표시해 둔 pane. 그 pane 은 건드리지 않는다."""
+    claimed = set()
+    for key in DOCK_ORDER:
+        if key == own:
+            continue
+        try:
+            with open(dock_marker(folder, key), encoding="utf-8") as f:
+                pane_id = f.read().strip()
+        except OSError:
+            continue
+        if pane_id:
+            claimed.add(pane_id)
+    return claimed
+
+
+def pick_pane(panes, stored_pane, agent_panes, claimed=frozenset()):
     """dock 안에서 host 를 띄울 pane.
 
     기억해 둔 pane 이 살아 있으면 그것, 아니면 아무도 쓰지 않는 빈 pane(label·token·agent 없음).
     다른 플러그인 블록이나 herdr-sidebar pane 은 건드리지 않는다. 빈 pane 이 없으면 None.
     """
     ids = [p["pane_id"] for p in panes]
-    if stored_pane in ids and stored_pane not in agent_panes:
+    if stored_pane in ids and stored_pane not in claimed and stored_pane not in agent_panes:
         return stored_pane
     free = [p["pane_id"] for p in panes
-            if not p.get("label") and not p.get("tokens") and p["pane_id"] not in agent_panes]
+            if not p.get("label") and not p.get("tokens") and p["pane_id"] not in agent_panes
+            and p["pane_id"] not in claimed]
     return free[0] if free else None
 
 
@@ -535,6 +593,9 @@ def ensure_intro(workspace_id, new_pane, cwd):
 
 def ensure_workspace(state):
     """공용 dock workspace 와 그 안의 timekit pane 을 확보한다. dock 이 있으면 pane 을 하나 나눠 들어간다."""
+    folder = os.path.dirname(os.path.abspath(state.directory))
+    wait_for_earlier(folder, PLUGIN_ID)
+    write_dock_marker(folder, PLUGIN_ID, "")
     workspaces = herdr_api.cli("workspace", "list").get("workspaces", [])
     workspace_id = find_workspace(workspaces)
     if workspace_id is None:
@@ -545,7 +606,7 @@ def ensure_workspace(state):
     state.write("workspace.id", workspace_id)
     panes = workspace_panes(workspace_id)
     agent_panes = {a["pane_id"] for a in herdr_api.cli("agent", "list").get("agents", [])}
-    pane_id = pick_pane(unlabel_intro(panes), state.read("pane.id"), agent_panes)
+    pane_id = pick_pane(unlabel_intro(panes), state.read("pane.id"), agent_panes, claimed_dock_panes(folder, PLUGIN_ID))
     if pane_id is None:
         anchor = next((p["pane_id"] for p in panes if not is_sidebar(p)), None)
         if anchor is None:
@@ -554,6 +615,7 @@ def ensure_workspace(state):
     if any(p["pane_id"] == pane_id and p.get("label") == INTRO_LABEL for p in panes):
         herdr_api.cli("pane", "rename", pane_id, "--clear")  # 소개 칸을 블록이 쓰므로 이름을 지운다
     state.write("pane.id", pane_id)
+    write_dock_marker(folder, PLUGIN_ID, pane_id)
     ensure_intro(workspace_id, pane_id, state.directory)
     return workspace_id, pane_id
 
@@ -623,6 +685,7 @@ def cmd_stop(args):
             herdr_api.cli("workspace", "close", workspace_id, check=False)
     for name in ("workspace.id", "pane.id", "heartbeat"):
         state.remove(name)
+    remove_dock_marker(os.path.dirname(os.path.abspath(state.directory)), PLUGIN_ID)
     return 0
 
 
