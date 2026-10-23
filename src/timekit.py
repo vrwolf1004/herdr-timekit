@@ -293,6 +293,9 @@ def timer_default_seconds(config):
     return DEFAULT_TIMER_SECONDS
 
 
+HOST_LOG_MAX_BYTES = 1024 * 1024  # host.log 가 이 크기를 넘으면 host.log.1 로 옮기고 새로 쓴다 (host.log.1 은 덮어쓴다)
+
+
 class State:
     """state dir 안의 작은 파일들. host 와 액션이 서로 다른 프로세스라 파일로 주고받는다."""
 
@@ -321,6 +324,19 @@ class State:
     def remove(self, name):
         try:
             os.remove(self.path(name))
+        except OSError:
+            pass
+
+    def append_log(self, message):
+        """host.log 에 한 줄 덧붙인다. 1MB 를 넘었으면 host.log.1 로 옮기고 새로 쓴다.
+        쓰기 실패는 무시한다. 로그 때문에 시계 표시가 멈추면 안 된다."""
+        path = self.path("host.log")
+        line = f"{datetime.now():%Y-%m-%d %H:%M:%S} {message}\n"
+        try:
+            if os.path.exists(path) and os.path.getsize(path) > HOST_LOG_MAX_BYTES:
+                os.replace(path, path + ".1")
+            with open(path, "a", encoding="utf-8") as file:
+                file.write(line)
         except OSError:
             pass
 
@@ -655,8 +671,7 @@ class Host:
         bundled = load_holidays()
 
         def log(message):
-            with open(os.path.join(self.state.directory, "host.log"), "a", encoding="utf-8") as file:
-                file.write(f"{datetime.now():%Y-%m-%d %H:%M:%S} {message}\n")
+            self.state.append_log(message)
 
         def work():
             self.holidays = holiday_source.holidays_for(self.state.directory, country, moment.year,
@@ -776,47 +791,60 @@ class Host:
             self.notice = t("cli.error", message=t("cli.unknown_zone", zone=zone))
             return
         zone = resolved
+
+        def add(config):
+            zones = list(config.get("timezones", []))
+            if zone in zones:
+                return False
+            config["timezones"] = zones + [zone]
+
         try:
-            config = load_config(self.config_dir)
+            added = update_config(self.config_dir, add)
         except ValueError as error:
             self.notice = t("cli.error", message=str(error))
             return
-        zones = list(config.get("timezones", []))
-        if zone in zones:
+        if not added:
             self.notice = t("cli.error", message=t("cli.already", zone=zone))
             return
-        config["timezones"] = zones + [zone]
-        save_config(self.config_dir, config)
         self.notice = t("world.added", zone=zone)
 
     def remove_last_zone(self):
+        removed = []
+
+        def drop_last(config):
+            zones = list(config.get("timezones", []))
+            if not zones:
+                return False
+            removed.append(zones.pop())
+            config["timezones"] = zones
+
         try:
-            config = load_config(self.config_dir)
+            dropped = update_config(self.config_dir, drop_last)
         except ValueError as error:
             self.notice = t("cli.error", message=str(error))
             return
-        zones = list(config.get("timezones", []))
-        if not zones:
+        if not dropped:
             self.notice = t("world.empty")
             return
-        removed = zones.pop()
-        config["timezones"] = zones
-        save_config(self.config_dir, config)
-        self.notice = t("world.removed", zone=removed)
+        self.notice = t("world.removed", zone=removed[0])
 
     def change_box_style(self):
         """시계 박스 디자인을 다음 것으로 바꾸고 config.json 에 저장한다."""
+        names = list(BOX_STYLES)
+        chosen = []
+
+        def next_style(config):
+            current = config.get("box_style", DEFAULT_BOX_STYLE)
+            index = names.index(current) if current in names else names.index(DEFAULT_BOX_STYLE)
+            config["box_style"] = names[(index + 1) % len(names)]
+            chosen.append(config["box_style"])
+
         try:
-            config = load_config(self.config_dir)
+            update_config(self.config_dir, next_style)
         except ValueError as error:
             self.notice = t("cli.error", message=str(error))
             return
-        names = list(BOX_STYLES)
-        current = config.get("box_style", DEFAULT_BOX_STYLE)
-        index = names.index(current) if current in names else names.index(DEFAULT_BOX_STYLE)
-        config["box_style"] = names[(index + 1) % len(names)]
-        save_config(self.config_dir, config)
-        self.notice = t("box.changed", style=config["box_style"])
+        self.notice = t("box.changed", style=chosen[0])
 
     def counter_is_running(self):
         return self.state.read_counter_state()["started_at"] is not None
@@ -976,26 +1004,61 @@ def read_key():
         return ""
 
 
+_zone_index_cache = None  # (소문자 시간대 이름 → 이름, 도시 이름 → 이름). 처음 찾을 때 한 번만 만든다.
+
+
+def _zone_index():
+    """시간대 목록은 실행 중에 바뀌지 않으므로 정렬과 사전 만들기를 처음 한 번만 한다."""
+    global _zone_index_cache
+    if _zone_index_cache is None:
+        zones = sorted(zoneinfo.available_timezones())
+        by_name = {zone.lower(): zone for zone in zones}
+        by_city = {}
+        for zone in zones:  # 같은 도시 이름이 여럿이면 정렬 순서에서 먼저 나온 것 (기존과 같다)
+            if "/" in zone:
+                by_city.setdefault(zone.split("/")[-1].lower(), zone)
+        _zone_index_cache = (by_name, by_city)
+    return _zone_index_cache
+
+
 def resolve_zone(name):
     """도시 이름(Seoul, new york)이나 시간대 이름(asia/seoul)을 IANA 시간대 이름으로 바꾼다. 대소문자는 구분하지 않는다. 찾지 못하면 None."""
     key = name.strip().replace(" ", "_").lower()
     if not key:
         return None
-    zones = sorted(zoneinfo.available_timezones())
-    by_name = {zone.lower(): zone for zone in zones}
+    by_name, by_city = _zone_index()
     if key in by_name:
         return by_name[key]
-    for zone in zones:
-        if "/" in zone and zone.split("/")[-1].lower() == key:
-            return zone
-    return None
+    return by_city.get(key)
 
 
 def save_config(config_dir, config):
+    """임시 파일에 쓰고 바꿔 끼운다. 쓰는 도중 멈춰도 config.json 은 예전 내용이 그대로 남는다."""
     os.makedirs(config_dir, exist_ok=True)
-    with open(os.path.join(config_dir, "config.json"), "w", encoding="utf-8") as file:
-        json.dump(config, file, ensure_ascii=False, indent=2)
-        file.write("\n")
+    target = os.path.join(config_dir, "config.json")
+    temp = f"{target}.{os.getpid()}.tmp"  # 프로세스마다 다른 이름이라 두 명령이 임시 파일을 서로 덮지 않는다
+    try:
+        with open(temp, "w", encoding="utf-8") as file:
+            json.dump(config, file, ensure_ascii=False, indent=2)
+            file.write("\n")
+        os.replace(temp, target)
+    except BaseException:
+        try:
+            os.remove(temp)
+        except OSError:
+            pass
+        raise
+
+
+def update_config(config_dir, change):
+    """저장 직전에 config.json 을 다시 읽고, change(config) 가 이번에 바꾸는 키만 고쳐서 저장한다.
+    change 가 False 를 돌려주면 저장하지 않고 False 를 돌려준다. 저장했으면 True.
+    다른 키는 다시 읽은 최신 값을 그대로 둔다 (오래된 복사본을 통째로 쓰지 않는다)."""
+    config = load_config(config_dir)
+    if change(config) is False:
+        return False
+    save_config(config_dir, config)
+    return True
 
 
 def cmd_world(args):
@@ -1005,33 +1068,52 @@ def cmd_world(args):
     except ValueError as error:
         print(f"timekit: {error}", file=sys.stderr)
         return 1
-    zones = list(config.get("timezones", []))
     if args.action == "list":
+        zones = list(config.get("timezones", []))
         print("\n".join(zones) if zones else t("cli.none"))
         return 0
-    if args.action == "clear":
-        zones = []
-    else:
-        if not args.value:
-            print(t("cli.error", message=t("cli.world_needs_zone", action=args.action)), file=sys.stderr)
+    if args.action != "clear" and not args.value:
+        print(t("cli.error", message=t("cli.world_needs_zone", action=args.action)), file=sys.stderr)
+        return 1
+    if args.action == "add":
+        resolved = resolve_zone(args.value)
+        if resolved is None:
+            print(t("cli.error", message=t("cli.unknown_zone", zone=args.value)), file=sys.stderr)
             return 1
-        if args.action == "add":
-            resolved = resolve_zone(args.value)
-            if resolved is None:
-                print(t("cli.error", message=t("cli.unknown_zone", zone=args.value)), file=sys.stderr)
-                return 1
-            args.value = resolved
+        args.value = resolved
+
+    outcome = {}
+
+    def apply(current):
+        # 저장 직전에 다시 읽은 목록을 고친다. 이 명령이 바꾸는 timezones 만 쓴다.
+        zones = list(current.get("timezones", []))
+        if args.action == "clear":
+            zones = []
+        elif args.action == "add":
             if args.value in zones:
-                print(t("cli.error", message=t("cli.already", zone=args.value)))
-                return 0
+                outcome["already"] = True
+                return False
             zones.append(args.value)
         else:
             if args.value not in zones:
-                print(t("cli.error", message=t("cli.not_in_list", zone=args.value)), file=sys.stderr)
-                return 1
+                outcome["missing"] = True
+                return False
             zones.remove(args.value)
-    config["timezones"] = zones
-    save_config(args.config, config)
+        current["timezones"] = zones
+        outcome["zones"] = zones
+
+    try:
+        update_config(args.config, apply)
+    except ValueError as error:
+        print(f"timekit: {error}", file=sys.stderr)
+        return 1
+    if outcome.get("missing"):
+        print(t("cli.error", message=t("cli.not_in_list", zone=args.value)), file=sys.stderr)
+        return 1
+    if outcome.get("already"):
+        print(t("cli.error", message=t("cli.already", zone=args.value)))
+        return 0
+    zones = outcome["zones"]
     print("\n".join(zones) if zones else t("cli.none"))
     return 0
 

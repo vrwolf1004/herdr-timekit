@@ -10,8 +10,9 @@ uses a pane in the shared `herdr-dock` workspace; the `stop` action hides it.
 Public holidays are fetched from Nager.Date and cached locally in five-year
 windows. The cache refreshes when the current year reaches the fifth year of
 its window, or when `holiday_country` changes. Refresh failures are recorded
-in `host.log`; an existing cache is retained. For Korea, the bundled calendar
-supplements the fetched data.
+in `host.log`; an existing cache is retained. When `host.log` passes 1 MiB it is
+moved to `host.log.1` (replacing the older copy), so at most two log files are kept.
+For Korea, the bundled calendar supplements the fetched data.
 The running counter advances once per second, with the same current value in
 the sidebar and clock box.
 
